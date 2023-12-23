@@ -1,6 +1,13 @@
+import { UnionToIntersection } from "../utils/types";
 import { PredicateRecord } from "./predicate";
 
 export type ExtendedTypes = Array<Type>;
+
+export type ExtendedPredicates<T extends Type | ExtendedType> =
+  T extends ExtendedType
+    ? T["predicateRecord"] &
+        UnionToIntersection<T["extendedTypes"][number]["predicateRecord"]>
+    : T["predicateRecord"];
 
 export class Type<
   Name extends string = string,
@@ -34,6 +41,8 @@ export function createType<TypeName extends string, PR extends PredicateRecord>(
 ) {
   return new Type(typeName, preds);
 }
+
+export type TypeRecord = Record<string, Type | ExtendedType>;
 
 // ! Working
 // type FigureOut<t extends Type<string, PredicateRecord>> = t['name'] extends string ? 'yes' : false;
