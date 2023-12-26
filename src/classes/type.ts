@@ -50,6 +50,7 @@ export class Type<
     opts: FragmentOpts<TR, typeof this.name, RelationsRecord<TR>>,
     relations: RelationsRecord<TR>,
     usedVars: Map<string, unknown>,
+    hasOrTypeValues: Set<string>,
     space = 1
   ) {
     const preds = this.extendedPreds();
@@ -70,6 +71,7 @@ export class Type<
           predOpt as WithFragment<never, never, never>,
           relations,
           usedVars,
+          hasOrTypeValues,
           space
         );
         inners.push(inner);
@@ -99,6 +101,7 @@ export class Type<
     withFrag: WithFragment<TR, typeof this.name, RelationsRecord<TR>> | boolean,
     relations: RelationsRecord<TR>,
     usedVars: Map<string, unknown>,
+    hasOrTypeValues: Set<string>,
     space = 1
   ): string {
     const _space = spacing(space);
@@ -113,7 +116,13 @@ export class Type<
     }
 
     const { with: w, opts, cascade, page, filter, order } = withFrag;
-    const builtPreds = this.buildPreds(w, relations, usedVars, space + 1);
+    const builtPreds = this.buildPreds(
+      w,
+      relations,
+      usedVars,
+      hasOrTypeValues,
+      space + 1
+    );
 
     const relationStr = forwardReverseType(
       typeName,
@@ -124,7 +133,8 @@ export class Type<
     );
     const directives = compileDirectives(
       { cascade, page, filter, order },
-      usedVars
+      usedVars,
+      hasOrTypeValues
     );
 
     return `${_space}${relationStr} ${directives} {\n${builtPreds}\n${_space}}`;

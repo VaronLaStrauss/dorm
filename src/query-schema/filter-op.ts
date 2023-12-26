@@ -49,7 +49,7 @@ export type AllowedFilter<
 > = {
   ops: PredFuncs<T, AP>;
   typeName: T["name"];
-  field: AP | string;
+  field: `${T["name"]}.${AP}`;
 };
 
 export function allowedFilter<
@@ -91,7 +91,7 @@ export function allowedFilter<
 
   return {
     alias: viewName,
-    field: predName,
+    field: `${type.name}.${predName}`,
     typeName: type.name,
     ops: indexes as never,
   };

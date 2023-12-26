@@ -54,7 +54,7 @@ const db = schema(
   }
 );
 
-const tryRet = db.fragment("Audit", {
+const tryRet = db.compileFragment("Audit", {
   user: {
     with: {
       branch: {
@@ -67,12 +67,12 @@ const tryRet = db.fragment("Audit", {
             {
               op: "eq",
               field: "Branch.name",
-              values: ["ABC"],
+              value: "waw",
             },
             {
               op: "eq",
               field: "Branch.name",
-              values: ["ABC"],
+              value: "ABC",
             },
           ],
           connector: "and",

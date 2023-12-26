@@ -8,9 +8,25 @@ export class Schema<
   TR extends TypeRecord = TypeRecord,
   RR extends RelationsRecord<TR> = RelationsRecord<TR>
 > {
-  constructor(public types: TR, public relations: RR) {}
+  hasOrTypeValues = new Set<string>();
 
-  fragment<key extends keyof TR, FO extends FragmentOpts<TR, key, RR>>(
+  constructor(public types: TR, public relations: RR) {
+    this.init();
+  }
+
+  init() {
+    for (const typeName in this.types) {
+      const type = this.types[typeName];
+      this.hasOrTypeValues.add(typeName);
+      const preds = type.extendedPreds();
+      for (const predName in preds) {
+        const pred = preds[predName];
+        this.hasOrTypeValues.add(`${pred.typeName}.${predName}`);
+      }
+    }
+  }
+
+  compileFragment<key extends keyof TR, FO extends FragmentOpts<TR, key, RR>>(
     typeName: key,
     fragmentOpts: FO,
     usedVars = new Map<string, unknown>()
@@ -21,7 +37,9 @@ export class Schema<
     const fragment = type.buildPreds<TR>(
       fragmentOpts as never,
       this.relations,
-      usedVars
+      usedVars,
+      this.hasOrTypeValues,
+      2
     );
 
     return {
