@@ -4,15 +4,31 @@ import { RelationsRecord } from "./relations";
 import { FragmentPreds } from "./return-type";
 import { TypeRecord } from "./type";
 
-export class Schema<TR extends TypeRecord, RR extends RelationsRecord<TR>> {
+export class Schema<
+  TR extends TypeRecord = TypeRecord,
+  RR extends RelationsRecord<TR> = RelationsRecord<TR>
+> {
   constructor(public types: TR, public relations: RR) {}
 
   fragment<key extends keyof TR, FO extends FragmentOpts<TR, key, RR>>(
-    type: key,
-    fragmentOpts: FO
-  ): FragmentPreds<TR, key, RR, FO> {
+    typeName: key,
+    fragmentOpts: FO,
+    usedVars = new Map<string, unknown>()
+  ) {
     // return;
-    throw Error("Unimplemented");
+
+    const type = this.types[typeName];
+    const fragment = type.buildPreds<TR>(
+      fragmentOpts as never,
+      this.relations,
+      usedVars
+    );
+
+    return {
+      fragment,
+      returnType: undefined as FragmentPreds<TR, key, RR, FO>,
+      usedVars,
+    };
   }
 
   // TODO:

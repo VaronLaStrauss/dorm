@@ -1,5 +1,6 @@
+import { Query } from "../query-schema";
 import { PredicateType } from "../utils/pred-type";
-import { predOpts } from "./predicate";
+import { PredOpts, predOpts } from "./predicate";
 import { Relations, RelationsRecord } from "./relations";
 import { ExtendedPredicates, TypeRecord } from "./type";
 
@@ -9,8 +10,8 @@ export type WithFragment<
   RR extends RelationsRecord<TR>
 > = {
   with: FragmentOpts<TR, ThisType, RR>;
-  opts?: ReturnType<typeof predOpts>;
-}; // TODO: Query type
+  opts?: PredOpts;
+} & Query;
 
 export type FragmentOpts<
   TR extends TypeRecord,
@@ -34,5 +35,5 @@ export type FragmentOpts<
           : never
         : never
       : never
-    : true | ReturnType<typeof predOpts>;
+    : true | PredOpts;
 };

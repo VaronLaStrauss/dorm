@@ -73,9 +73,9 @@ export type FragmentPreds<
             ? key extends keyof RR[TypeName]["relations"]
               ? RR[TypeName]["relations"][key] extends Forward | Reverse
                 ? {
-                    [k in key]: PickLeaf<
-                      RR[TypeName]["relations"][key]["type"]
-                    >;
+                    [k in key]: EP[key]["options"]["asArray"] extends true
+                      ? PickLeaf<RR[TypeName]["relations"][key]["type"]>[]
+                      : PickLeaf<RR[TypeName]["relations"][key]["type"]>;
                   }
                 : never
               : never
@@ -98,28 +98,43 @@ export type FragmentPreds<
               ? FO[key]["opts"] extends ReturnType<typeof predOpts>
                 ? FO[key]["opts"]["alias"] extends string
                   ? {
-                      [k in FO[key]["opts"]["alias"]]: FragmentPreds<
-                        TR,
-                        RR[TypeName]["relations"][key]["type"]["name"],
-                        RR,
-                        FO[key]["with"]
-                      >;
+                      [k in FO[key]["opts"]["alias"]]: EP[key]["options"]["asArray"] extends true
+                        ? FragmentPreds<
+                            TR,
+                            RR[TypeName]["relations"][key]["type"]["name"],
+                            RR,
+                            FO[key]["with"]
+                          >[]
+                        : FragmentPreds<
+                            TR,
+                            RR[TypeName]["relations"][key]["type"]["name"],
+                            RR,
+                            FO[key]["with"]
+                          >;
                     }
-                  : {
-                      [k in key]: FragmentPreds<
-                        TR,
-                        RR[TypeName]["relations"][key]["type"]["name"],
-                        RR,
-                        FO[key]["with"]
-                      >;
-                    }
-                : {
-                    [k in key]: FragmentPreds<
-                      TR,
-                      RR[TypeName]["relations"][key]["type"]["name"],
-                      RR,
-                      FO[key]["with"]
-                    >;
+                  : never
+                : // : {
+                  //     [k in key]: FragmentPreds<
+                  //       TR,
+                  //       RR[TypeName]["relations"][key]["type"]["name"],
+                  //       RR,
+                  //       FO[key]["with"]
+                  //     >;
+                  //   }
+                  {
+                    [k in key]: EP[key]["options"]["asArray"] extends true
+                      ? FragmentPreds<
+                          TR,
+                          RR[TypeName]["relations"][key]["type"]["name"],
+                          RR,
+                          FO[key]["with"]
+                        >[]
+                      : FragmentPreds<
+                          TR,
+                          RR[TypeName]["relations"][key]["type"]["name"],
+                          RR,
+                          FO[key]["with"]
+                        >;
                   }
               : never
             : never

@@ -1,3 +1,4 @@
+import { FilterValue, Query } from "../query-schema";
 import { FragmentOpts } from "./fragment";
 import { RelationsRecord } from "./relations";
 import { TypeRecord } from "./type";
@@ -8,5 +9,5 @@ export type QueryOpts<
   TypeName extends keyof TR
 > = {
   fragment?: FragmentOpts<TR, TypeName, RR>;
-  mainFunc: object; // FilterValue;
-}; // & Query
+  mainFunc: FilterValue;
+} & Query;

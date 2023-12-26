@@ -1,13 +1,22 @@
+import { Static } from "elysia";
+import { filterValueReqSchema } from "../query-schema";
+import { allowedFilter } from "../query-schema/filter-op";
 import { PredicateType } from "../utils/pred-type";
 import { predicate } from "./predicate";
 import { forward, relations, reverse } from "./relations";
 import { schema } from "./schema";
 import { createType } from "./type";
 
-const Employee = createType("Employee", {
-  name: predicate({ type: PredicateType.STRING }),
-  branch: predicate({ type: PredicateType.UID }),
+const Human = createType("Human", {
+  name: predicate({
+    type: PredicateType.STRING,
+    indexes: ["hash"],
+  }),
 });
+
+const Employee = createType("Employee", {
+  branch: predicate({ type: PredicateType.UID }),
+}).extends(Human);
 
 const User = createType("User", {
   email: predicate({ type: PredicateType.STRING }),
@@ -20,7 +29,7 @@ const Branch = createType("Branch", {
 
 const Audit = createType("Audit", {
   user: predicate({ type: PredicateType.UID }),
-  date: predicate({ type: PredicateType.DATETIME, asArray: true }),
+  date: predicate({ type: PredicateType.DATETIME, indexes: ["hour"] }),
 });
 
 const UserRel = relations(User, {
@@ -32,7 +41,7 @@ const AuditRel = relations(Audit, {
   user: forward(User),
 });
 
-const _schema = schema(
+const db = schema(
   {
     User,
     Audit,
@@ -45,16 +54,48 @@ const _schema = schema(
   }
 );
 
-const tryRet = _schema.fragment("Audit", {
+const tryRet = db.fragment("Audit", {
   user: {
     with: {
       branch: {
         with: {
           name: true,
         },
+        cascade: true,
+        filter: {
+          values: [
+            {
+              op: "eq",
+              field: "Branch.name",
+              values: ["ABC"],
+            },
+            {
+              op: "eq",
+              field: "Branch.name",
+              values: ["ABC"],
+            },
+          ],
+          connector: "and",
+        },
+      },
+      // audits: true,
+      name: true,
+      audits: {
+        with: {
+          date: true,
+        },
       },
     },
   },
+  date: true,
 });
 
-const x = tryRet.user.branch.name;
+console.log(tryRet.fragment);
+console.log(tryRet.usedVars);
+
+// const userFilter = allowedFilter(User, "name", 'waw');
+// const employeeFilter = allowedFilter(Employee, "name", 'waw');
+// const dateFilter = allowedFilter(Audit, "date", "waw");
+
+// const y = filterValueReqSchema([dateFilter]);
+// type Y = Static<typeof y>;
