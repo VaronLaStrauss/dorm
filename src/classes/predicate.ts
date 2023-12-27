@@ -53,9 +53,20 @@ export type BoolPredicate = {
   type: PredicateType.BOOL;
 };
 
+export const GoGeomTypes = [
+  "Point",
+  "LineString",
+  "Polygon",
+  "MultiPoint",
+  "MultiLineString",
+  "MultiPolygon",
+  "GeometryCollection",
+] as const;
+
 export type GeoPredicate = {
   indexes?: true;
   type: PredicateType.GEO;
+  geoType: (typeof GoGeomTypes)[number];
 };
 
 export class Predicate<PIO extends PredicateInitOpts> {

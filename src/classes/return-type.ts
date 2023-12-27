@@ -6,6 +6,7 @@ import {
   DateTimePredicate,
   FloatPredicate,
   GeoPredicate,
+  GoGeomTypes,
   IntPredicate,
   PasswordPredicate,
   Predicate,
@@ -16,6 +17,18 @@ import {
 } from "./predicate";
 import { Forward, Relations, RelationsRecord, Reverse } from "./relations";
 import { ExtendedPredicates, Type, TypeRecord } from "./type";
+
+export type InferGeo<Geo extends (typeof GoGeomTypes)[number]> =
+  Geo extends (typeof GoGeomTypes)[0]
+    ? [number, number]
+    : Geo extends (typeof GoGeomTypes)[1 | 2 | 3]
+    ? [number, number][]
+    : Geo extends (typeof GoGeomTypes)[4 | 5]
+    ? [number, number][][]
+    : {
+        type: (typeof GoGeomTypes)[number];
+        coordinates: InferGeo<(typeof GoGeomTypes)[number]>;
+      }[];
 
 export type InferLeafType<
   P extends Predicate<PredicateInitOpts>,
@@ -31,7 +44,7 @@ export type InferLeafType<
   : Opts extends FloatPredicate
   ? number
   : Opts extends GeoPredicate
-  ? { x: number; y: number }
+  ? InferGeo<Opts["geoType"]>
   : Opts extends IntPredicate
   ? number
   : Opts extends PasswordPredicate
