@@ -13,6 +13,7 @@ import {
   PredicateInitOpts,
   StringPredicate,
   UidPredicate,
+  passwordOpts,
   predOpts,
 } from "./predicate";
 import { Forward, Relations, RelationsRecord, Reverse } from "./relations";
@@ -52,7 +53,9 @@ export type InferLeafType<
   : never;
 
 export type PickleAllLeaf<T extends Type, EP extends ExtendedPredicates<T>> = {
-  [key in keyof EP]: EP[key]["options"]["type"] extends PredicateType.UID
+  [key in keyof EP]: EP[key]["options"]["type"] extends
+    | PredicateType.UID
+    | PredicateType.PASSWORD
     ? never
     : key;
 }[keyof EP];
@@ -94,10 +97,10 @@ export type FragmentPreds<
               : never
             : never
           : { [k in key]: InferPredicateOpts<EP[key]> }
-        : FO[key] extends ReturnType<typeof predOpts>
-        ? FO[key]["alias"] extends infer U
+        : FO[key] extends ReturnType<typeof predOpts | typeof passwordOpts>
+        ? FO[key]["alias"] extends string
           ? {
-              [k in U & string]: InferPredicateOpts<EP[key]>;
+              [k in FO[key]["alias"]]: InferPredicateOpts<EP[key]>;
             }
           : { [k in key]: InferPredicateOpts<EP[key]> }
         : RR[TypeName] extends Relations<TR[TypeName]>

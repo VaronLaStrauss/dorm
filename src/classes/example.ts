@@ -98,7 +98,7 @@ const frag = db.fragment("Audit", {
   },
 });
 
-console.log(frag.fragment);
+console.log(frag.execute().user.);
 
 const q = db.query({
   x: {
