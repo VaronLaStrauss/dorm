@@ -127,10 +127,11 @@ export function predOpts<
 export type PredOpts = ReturnType<typeof predOpts>;
 
 export function passwordOpts<
+  pwdVar extends `$pass${string}`,
   alias extends string | undefined,
   asVar extends string | undefined
 >(
-  pwdVar: string,
+  pwdVar: pwdVar,
   alias: alias = undefined as alias,
   asVar: asVar = undefined as asVar
 ) {
