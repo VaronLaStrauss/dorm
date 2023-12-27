@@ -48,7 +48,7 @@ export type InferLeafType<
   : Opts extends IntPredicate
   ? number
   : Opts extends PasswordPredicate
-  ? string
+  ? boolean
   : never;
 
 export type PickleAllLeaf<T extends Type, EP extends ExtendedPredicates<T>> = {

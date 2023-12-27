@@ -81,19 +81,19 @@ export class Type<
         inners.push(inner);
         continue;
       }
-      const inner = pred.build(predKey, predOpt as PredOpts, space);
+      const inner = pred.build(predKey, predOpt as PredOpts, usedVars, space);
       inners.push(inner);
     }
     return inners.join("\n");
   }
 
-  buildAllLeafPreds(space = 1) {
+  buildAllLeafPreds(usedVars: Map<string, unknown>, space = 1) {
     const preds = this.extendedPreds();
     const inners: string[] = [];
     for (const predKey in preds) {
       const pred = preds[predKey];
       if (pred.options.type === PredicateType.UID) continue;
-      inners.push(pred.build(predKey, true, space));
+      inners.push(pred.build(predKey, true, usedVars, space));
     }
 
     return inners.join("\n");
@@ -114,7 +114,7 @@ export class Type<
       | Reverse;
 
     if (typeof withFrag === "boolean") {
-      const builtPreds = this.buildAllLeafPreds(space + 1);
+      const builtPreds = this.buildAllLeafPreds(usedVars, space + 1);
       const relationStr = forwardReverseType(typeName, predName, relation);
       return `${_space}${relationStr} {\n${builtPreds}\n${_space}}`;
     }

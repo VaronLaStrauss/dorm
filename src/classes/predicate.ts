@@ -20,7 +20,6 @@ export type PredicateInitOpts = {
 
 export type StringPredicate = {
   indexes?: (keyof typeof StringIndex)[];
-
   type: PredicateType.STRING;
   fromValues?: readonly string[];
 };
@@ -74,8 +73,22 @@ export class Predicate<PIO extends PredicateInitOpts> {
 
   constructor(public options: PIO) {}
 
-  build(predName: string, opts: PredOpts | boolean, space: number) {
+  build(
+    predName: string,
+    opts: PredOpts | boolean,
+    usedVars: Map<string, unknown>,
+    space: number
+  ) {
     const _space = spacing(space);
+    if (this.options.type === PredicateType.PASSWORD) {
+      const var1 = `$pass${usedVars.size}`;
+      const checkPwd = `checkpwd(${this.typeName}.${predName}, ${var1})`;
+      if (typeof opts === "boolean") return `${_space}${predName}: ${checkPwd}`;
+      const { alias, asVar } = opts;
+      const _asVar = asVar ? ` as ${asVar}` : "";
+      return `${_space}${alias ?? predName}: ${checkPwd}${_asVar}`;
+    }
+
     if (typeof opts === "boolean")
       return `${_space}${predName}: ${this.typeName}.${predName}`;
 
