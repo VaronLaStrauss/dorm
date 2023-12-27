@@ -58,7 +58,10 @@ export class DormQuery<
     return { query, usedVars };
   }
 
-  async execute(db: DgraphClient) {
+  async execute(
+    db: DgraphClient,
+    outsourcedVars: Record<string, unknown> = {}
+  ) {
     const vars: Record<string, unknown> = {};
     const varDec: string[] = [];
 
@@ -66,7 +69,8 @@ export class DormQuery<
     for (const queryKey in this.queries) {
       const { query, usedVars } = this.build(queryKey);
       queries.push(query);
-      for (const [key, val] of usedVars) {
+      for (let [key, val] of usedVars) {
+        if (key in outsourcedVars) val = outsourcedVars[key];
         vars[key] = val;
         varDec.push(`${key}: ${parseDqlType(val)}`);
       }
@@ -76,19 +80,20 @@ export class DormQuery<
     if (varDec.length) query += `(${varDec.join(", ")})`;
     query += `{\n${queries.join("\n")}\n}`;
 
-    return query as QueryReturn<TR, RR, QO>;
+    console.log(query);
+    console.log(vars);
 
-    // const txn = db.newTxn({ readOnly: true });
-    // let res: ReturnType<typeof txn.queryWithVars>;
-    // if (varDec.length) res = txn.queryWithVars(query, vars);
-    // else res = txn.query(query);
+    const txn = db.newTxn({ readOnly: true });
+    let res: ReturnType<typeof txn.queryWithVars>;
+    if (varDec.length) res = txn.queryWithVars(query, vars);
+    else res = txn.query(query);
 
-    // const data = await res;
+    const data = await res;
 
-    // return {
-    //   data: data.getJson() as QueryReturn<TR, RR, QO>,
-    //   metris: data.getMetrics(),
-    //   latency: data.getLatency(),
-    // };
+    return {
+      data: data.getJson() as QueryReturn<TR, RR, QO>,
+      metris: data.getMetrics(),
+      latency: data.getLatency(),
+    };
   }
 }

@@ -79,17 +79,21 @@ export class Predicate<PIO extends PredicateInitOpts> {
 
   build(
     predName: string,
-    opts: PredOpts | boolean,
+    opts: PredOpts | PasswordOpts | boolean,
     usedVars: Map<string, unknown>,
     space: number
   ) {
     const _space = spacing(space);
-    if (this.options.type === PredicateType.PASSWORD) {
-      const var1 = `$pass${usedVars.size}`;
-      usedVars.set(var1, undefined);
-      const checkPwd = `checkpwd(${this.typeName}.${predName}, ${var1})`;
-      if (typeof opts === "boolean") return `${_space}${predName}: ${checkPwd}`;
-      const { alias, asVar } = opts;
+    if (
+      this.options.type === PredicateType.PASSWORD &&
+      typeof opts === "object" &&
+      "pwdVar" in opts
+    ) {
+      const { alias, asVar, pwdVar } = opts;
+      if (!pwdVar.toLowerCase().startsWith("$pass"))
+        throw new Error("Password vars must start with $pass");
+      const checkPwd = `checkpwd(${this.typeName}.${predName}, ${pwdVar})`;
+      usedVars.set(pwdVar, undefined);
       const _asVar = asVar ? ` as ${asVar}` : "";
       return `${_space}${alias ?? predName}: ${checkPwd}${_asVar}`;
     }
@@ -121,6 +125,19 @@ export function predOpts<
 }
 
 export type PredOpts = ReturnType<typeof predOpts>;
+
+export function passwordOpts<
+  alias extends string | undefined,
+  asVar extends string | undefined
+>(
+  pwdVar: string,
+  alias: alias = undefined as alias,
+  asVar: asVar = undefined as asVar
+) {
+  return { pwdVar, alias, asVar };
+}
+
+export type PasswordOpts = ReturnType<typeof passwordOpts>;
 
 // ! Working:
 // type FigureOut<P extends Predicate<PredicateType, PredicateInitOpts>> = P['pt'] extends PredicateType.STRING ? 'waw' : boolean;

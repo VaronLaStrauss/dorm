@@ -1,7 +1,7 @@
 import { FragmentPreds, Schema } from ".";
 import { Query } from "../query-schema";
 import { PredicateType } from "../utils/pred-type";
-import { PredOpts } from "./predicate";
+import { PasswordOpts, PredOpts } from "./predicate";
 import { Relations, RelationsRecord } from "./relations";
 import { ExtendedPredicates, TypeRecord } from "./type";
 
@@ -37,6 +37,8 @@ export type FragmentOpts<
             : never
           : never
         : never
+      : EP[key]["options"]["type"] extends PredicateType.PASSWORD
+      ? PasswordOpts
       : true | PredOpts;
   };
 }[keyof EP];

@@ -1,5 +1,5 @@
 import { PredicateType } from "../utils/pred-type";
-import { fromValues, predicate } from "./predicate";
+import { fromValues, passwordOpts, predicate } from "./predicate";
 import { forward, relations, reverse } from "./relations";
 import { schema } from "./schema";
 import { createType } from "./type";
@@ -21,6 +21,7 @@ const Employee = createType("Employee", {
 
 const User = createType("User", {
   email: predicate({ type: PredicateType.STRING }),
+  password: predicate({ type: PredicateType.PASSWORD }),
   audits: predicate({ type: PredicateType.UID, asArray: true }),
 }).extends(Employee);
 
@@ -63,6 +64,7 @@ const db = schema(
 const frag = db.fragment("Audit", {
   user: {
     with: {
+      password: passwordOpts("$pass1"),
       activeType: true,
       branch: {
         with: {
@@ -96,13 +98,15 @@ const frag = db.fragment("Audit", {
   },
 });
 
+console.log(frag.fragment);
+
 const q = db.query({
   x: {
     fragment: frag.append({ date: true }),
     mainFunc: { op: "type", value: "Audit" },
   },
 });
-console.log(await q.execute(undefined as never));
+console.log(await q.execute(undefined as never, { $pass1: "waw" }));
 
 console.log(db.build());
 
