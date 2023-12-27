@@ -82,3 +82,11 @@ export class Fragment<
     throw new Error("Not callable - used only for type");
   }
 }
+
+export type InferReturn<
+  F extends Fragment<TR, RR, key, FO>,
+  TR extends TypeRecord = TypeRecord,
+  RR extends RelationsRecord<TR> = RelationsRecord<TR>,
+  key extends keyof TR = keyof TR,
+  FO extends FragmentOpts<TR, key, RR> = FragmentOpts<TR, key, RR>
+> = ReturnType<F["execute"]>;
