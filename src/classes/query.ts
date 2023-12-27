@@ -29,7 +29,7 @@ export type QueryReturn<
     keyof TR,
     FragmentOpts<TR, keyof TR, RR>
   >
-    ? ReturnType<QO[key]["fragment"]["execute"]>
+    ? ReturnType<QO[key]["fragment"]["execute"]>[]
     : never;
 };
 
