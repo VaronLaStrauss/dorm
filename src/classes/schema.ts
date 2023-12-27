@@ -48,7 +48,7 @@ export class Schema<
     typeName: key,
     fragmentOpts: FO,
     usedVars = new Map<string, unknown>()
-  ): Fragment<TR, RR, key, FO> {
+  ) {
     const type = this.types[typeName];
     const fragment = type.buildPreds<TR, key>(
       fragmentOpts as never,

@@ -20,24 +20,26 @@ export type FragmentOpts<
   RR extends RelationsRecord<TR>,
   EP extends ExtendedPredicates<TR[TypeName]> = ExtendedPredicates<TR[TypeName]>
 > = {
-  [key in keyof EP]?: EP[key]["options"]["type"] extends PredicateType.UID
-    ? TypeName extends keyof RR
-      ? RR[TypeName] extends Relations<TR[TypeName]>
-        ? key extends keyof RR[TypeName]["relations"]
-          ? RR[TypeName]["relations"][key]["type"]["name"] extends keyof TR
-            ?
-                | WithFragment<
-                    TR,
-                    RR[TypeName]["relations"][key]["type"]["name"],
-                    RR
-                  >
-                | true
+  [key in keyof EP]?: {
+    [k in key]: EP[key]["options"]["type"] extends PredicateType.UID
+      ? TypeName extends keyof RR
+        ? RR[TypeName] extends Relations<TR[TypeName]>
+          ? key extends keyof RR[TypeName]["relations"]
+            ? RR[TypeName]["relations"][key]["type"]["name"] extends keyof TR
+              ?
+                  | WithFragment<
+                      TR,
+                      RR[TypeName]["relations"][key]["type"]["name"],
+                      RR
+                    >
+                  | true
+              : never
             : never
           : never
         : never
-      : never
-    : true | PredOpts;
-};
+      : true | PredOpts;
+  };
+}[keyof EP];
 
 export class Fragment<
   TR extends TypeRecord,
