@@ -40,7 +40,7 @@ export function compileDirectives(
 }
 
 export function compileMainFunc<TR extends TypeRecord>(
-  { mainFunc, order, page }: QueryOpts<TR, RelationsRecord<TR>, keyof TR>,
+  { mainFunc, order, page }: QueryOpts<TR, RelationsRecord<TR>>[string],
   usedVars: Map<string, unknown>,
   hasOrTypeValues: Set<string>
 ) {

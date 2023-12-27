@@ -1,6 +1,3 @@
-import { Static } from "elysia";
-import { filterValueReqSchema } from "../query-schema";
-import { allowedFilter } from "../query-schema/filter-op";
 import { PredicateType } from "../utils/pred-type";
 import { predicate } from "./predicate";
 import { forward, relations, reverse } from "./relations";
@@ -32,9 +29,13 @@ const Audit = createType("Audit", {
   date: predicate({ type: PredicateType.DATETIME, indexes: ["hour"] }),
 });
 
+const EmployeRel = relations(Employee, {
+  branch: forward(Branch),
+});
+
 const UserRel = relations(User, {
   audits: reverse(Audit, "user"),
-  branch: forward(Branch),
+  ...EmployeRel.relations,
 });
 
 const AuditRel = relations(Audit, {
@@ -51,10 +52,11 @@ const db = schema(
   {
     User: UserRel,
     Audit: AuditRel,
+    Employee: EmployeRel,
   }
 );
 
-const tryRet = db.compileFragment("Audit", {
+const frag = db.fragment("Audit", {
   user: {
     with: {
       branch: {
@@ -87,11 +89,17 @@ const tryRet = db.compileFragment("Audit", {
       },
     },
   },
-  date: true,
 });
 
-console.log(tryRet.fragment);
-console.log(tryRet.usedVars);
+const q = db.query({
+  x: {
+    fragment: frag.append({ date: true }),
+    mainFunc: { op: "type", value: "Audit" },
+  },
+});
+console.log(await q.execute(undefined as never));
+
+console.log(db.build());
 
 // const userFilter = allowedFilter(User, "name", 'waw');
 // const employeeFilter = allowedFilter(Employee, "name", 'waw');

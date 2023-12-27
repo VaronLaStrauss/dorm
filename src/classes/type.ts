@@ -1,6 +1,8 @@
 import {
   Forward,
   FragmentOpts,
+  Relation,
+  Relations,
   RelationsRecord,
   Reverse,
   WithFragment,
@@ -46,8 +48,8 @@ export class Type<
     return this.predicateRecord;
   }
 
-  buildPreds<TR extends TypeRecord>(
-    opts: FragmentOpts<TR, typeof this.name, RelationsRecord<TR>>,
+  buildPreds<TR extends TypeRecord, key extends keyof TR>(
+    opts: FragmentOpts<TR, key, RelationsRecord<TR>>,
     relations: RelationsRecord<TR>,
     usedVars: Map<string, unknown>,
     hasOrTypeValues: Set<string>,
@@ -138,6 +140,68 @@ export class Type<
     );
 
     return `${_space}${relationStr} ${directives} {\n${builtPreds}\n${_space}}`;
+  }
+
+  buildSchema(relations: RelationsRecord<TypeRecord>) {
+    const innerPreds: string[] = [];
+    const outerPreds: string[] = [];
+    const space = spacing(1);
+
+    const preds = this.extendedPreds();
+
+    for (const predKey in preds) {
+      const pred = preds[predKey];
+      const {
+        options: { type, asArray, count },
+        typeName,
+      } = pred;
+
+      const typeDeclaration = `${typeName}.${predKey}`;
+
+      const predType = asArray ? `[${type}]` : type;
+      let outerPred = `${typeDeclaration}: ${predType}`;
+      if ("indexes" in pred.options) {
+        const indexes: string[] = [];
+        const { indexes: _indexes } = pred.options;
+        if (typeof _indexes === "boolean") indexes.push(type);
+        else
+          for (const indexKey of _indexes as Array<string>) {
+            indexes.push(indexKey);
+          }
+        outerPred += ` @index(${indexes.join(", ")})`;
+      }
+
+      if (count) outerPred += ` @count`;
+
+      let innerPred = typeDeclaration;
+      if (type === PredicateType.UID) {
+        const rels = relations[pred.typeName];
+        const rel = rels?.relations[predKey as never]! as Forward | Reverse;
+
+        if (rel instanceof Forward) {
+          const predType = asArray ? `[${rel.type.name}]` : rel.type.name;
+          innerPred += `: ${predType}`;
+          outerPred += " @reverse";
+        } else if (rel instanceof Reverse) {
+          const predType = asArray ? `[${rel.type.name}]` : rel.type.name;
+          innerPred = `<~${rel.type.name}.${rel.field}>: ${predType}`;
+          outerPred = "";
+        } else {
+          outerPred = `# Incorrect implementation of ${innerPred}`;
+          innerPred = `# Incorrect implementation of ${innerPred}`;
+        }
+      }
+      if (outerPred.trim().length) {
+        outerPred += " .";
+        outerPreds.push(outerPred);
+      }
+
+      innerPreds.push(space + innerPred);
+    }
+
+    return `${outerPreds.join("\n")}\ntype ${this.name} {\n${innerPreds.join(
+      "\n"
+    )}\n}\n`;
   }
 }
 

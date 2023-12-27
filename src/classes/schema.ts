@@ -1,7 +1,7 @@
-import { FragmentOpts } from "./fragment";
-import { QueryOpts } from "./query";
+import { DgraphClient, Operation } from "dgraph-js";
+import { Fragment, FragmentOpts } from "./fragment";
+import { DormQuery, QueryOpts } from "./query";
 import { RelationsRecord } from "./relations";
-import { FragmentPreds } from "./return-type";
 import { TypeRecord } from "./type";
 
 export class Schema<
@@ -26,15 +26,31 @@ export class Schema<
     }
   }
 
-  compileFragment<key extends keyof TR, FO extends FragmentOpts<TR, key, RR>>(
+  build() {
+    const schema: string[] = [];
+    for (const typeName in this.types) {
+      const type = this.types[typeName];
+      schema.push(type.buildSchema(this.relations));
+    }
+
+    return schema.join("\n");
+  }
+
+  async setSchema(db: DgraphClient) {
+    const schema = this.build();
+    const op = new Operation();
+    op.setSchema(schema);
+    const alterOp = await db.alter(op);
+    return alterOp.getData();
+  }
+
+  fragment<key extends keyof TR, FO extends FragmentOpts<TR, key, RR>>(
     typeName: key,
     fragmentOpts: FO,
     usedVars = new Map<string, unknown>()
-  ) {
-    // return;
-
+  ): Fragment<TR, RR, key, FO> {
     const type = this.types[typeName];
-    const fragment = type.buildPreds<TR>(
+    const fragment = type.buildPreds<TR, key>(
       fragmentOpts as never,
       this.relations,
       usedVars,
@@ -42,18 +58,12 @@ export class Schema<
       2
     );
 
-    return {
-      fragment,
-      returnType: undefined as FragmentPreds<TR, key, RR, FO>,
-      usedVars,
-    };
+    return new Fragment<TR, RR, key, FO>(this, fragment, usedVars, typeName);
   }
 
-  // TODO:
-  query<TypeName extends keyof TR, QR extends QueryOpts<TR, RR, TypeName>>(
-    typeName: TypeName,
-    query: QR
-  ) {}
+  query<QO extends QueryOpts<TR, RR>>(queries: QO) {
+    return new DormQuery<TR, RR, QO>(queries, this);
+  }
 }
 
 export function schema<TR extends TypeRecord, RR extends RelationsRecord<TR>>(
