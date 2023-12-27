@@ -53,10 +53,14 @@ export class Type<
     relations: RelationsRecord<TR>,
     usedVars: Map<string, unknown>,
     hasOrTypeValues: Set<string>,
-    space = 1
+    space = 1,
+    appendOnly = false
   ) {
+    const _space = spacing(space);
     const preds = this.extendedPreds();
-    const inners: string[] = [];
+    const inners: string[] = [
+      ...(!appendOnly ? [`${_space}uid`, `${_space}type: dgraph.type`] : []),
+    ];
     const relation = relations[this.name]!;
 
     for (const predKey in opts) {

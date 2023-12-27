@@ -61,7 +61,8 @@ export class Fragment<
       relations,
       this.usedVars,
       this.schema.hasOrTypeValues,
-      2
+      2,
+      true
     );
     const f = this.fragment + `\n${fragment}`;
     return new Fragment<
