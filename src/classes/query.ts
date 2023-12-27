@@ -24,10 +24,10 @@ export type QueryReturn<
   QO extends QueryOpts<TR, RR>
 > = {
   [key in keyof QO]: QO[key]["fragment"] extends Fragment<
-    never,
-    never,
-    never,
-    never
+    TR,
+    RR,
+    keyof TR,
+    FragmentOpts<TR, keyof TR, RR>
   >
     ? ReturnType<QO[key]["fragment"]["execute"]>
     : never;

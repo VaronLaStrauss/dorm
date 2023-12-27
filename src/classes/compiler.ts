@@ -39,8 +39,11 @@ export function compileDirectives(
   return directives.filter((v) => !!v).join(" ");
 }
 
-export function compileMainFunc<TR extends TypeRecord>(
-  { mainFunc, order, page }: QueryOpts<TR, RelationsRecord<TR>>[string],
+export function compileMainFunc<
+  TR extends TypeRecord,
+  RR extends RelationsRecord<TR>
+>(
+  { mainFunc, order, page }: QueryOpts<TR, RR>[string],
   usedVars: Map<string, unknown>,
   hasOrTypeValues: Set<string>
 ) {

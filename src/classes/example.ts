@@ -81,7 +81,7 @@ const frag = db.fragment("Audit", {
         },
       },
       // audits: true,
-      name: true,
+      // name: true,
       audits: {
         with: {
           date: true,

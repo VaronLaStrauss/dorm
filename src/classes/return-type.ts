@@ -142,4 +142,4 @@ export type FragmentPreds<
         : never
       : never;
   }[keyof FO]
->;
+> & { uid: string; type: string[] };
