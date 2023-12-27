@@ -21,7 +21,7 @@ export type PredicateInitOpts = {
 export type StringPredicate = {
   indexes?: (keyof typeof StringIndex)[];
   type: PredicateType.STRING;
-  fromValues?: readonly string[];
+  fromValues?: ReadonlyArray<string>;
 };
 
 export type DateTimePredicate = {
@@ -67,6 +67,10 @@ export type GeoPredicate = {
   type: PredicateType.GEO;
   geoType: (typeof GoGeomTypes)[number];
 };
+
+export function fromValues<T extends Readonly<string>>(...vals: T[]) {
+  return vals;
+}
 
 export class Predicate<PIO extends PredicateInitOpts> {
   typeName = "";

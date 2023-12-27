@@ -1,5 +1,5 @@
 import { PredicateType } from "../utils/pred-type";
-import { predicate } from "./predicate";
+import { fromValues, predicate } from "./predicate";
 import { forward, relations, reverse } from "./relations";
 import { schema } from "./schema";
 import { createType } from "./type";
@@ -8,6 +8,10 @@ const Human = createType("Human", {
   name: predicate({
     type: PredicateType.STRING,
     indexes: ["hash"],
+  }),
+  activeType: predicate({
+    type: PredicateType.STRING,
+    fromValues: fromValues("active", "inactive"),
   }),
 });
 
@@ -59,6 +63,7 @@ const db = schema(
 const frag = db.fragment("Audit", {
   user: {
     with: {
+      activeType: true,
       branch: {
         with: {
           name: true,
