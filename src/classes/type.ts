@@ -1,8 +1,6 @@
 import {
   Forward,
   FragmentOpts,
-  Relation,
-  Relations,
   RelationsRecord,
   Reverse,
   WithFragment,
