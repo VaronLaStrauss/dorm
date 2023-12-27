@@ -1,5 +1,4 @@
-import type { Static } from "@sinclair/typebox";
-import { t } from "elysia";
+import { t, Static } from "elysia";
 import { OneValIndex, TwoValIndex, ZeroValIndex } from "../utils";
 
 export const limits = [5, 10, 15, 20, 25] as const;
