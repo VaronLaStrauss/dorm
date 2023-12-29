@@ -8,6 +8,7 @@ const Human = createType("Human", {
   name: predicate({
     type: PredicateType.STRING,
     indexes: ["hash"],
+    nullable: true,
   }),
   activeType: predicate({
     type: PredicateType.STRING,
@@ -87,18 +88,34 @@ const frag = db.fragment("Audit", {
           connector: "and",
         },
       },
+      name: true,
       // audits: true,
       // name: true,
-      audits: {
-        with: {
-          date: true,
-        },
-      },
+      audits: true,
     },
   },
 });
 
-console.log(frag.execute().user.);
+// console.log(frag.execute().user.audits);
+
+const mut = db.prepareMutation("User", {
+  activeType: "active",
+  audits: [
+    {
+      date: "",
+      types: "",
+      user: undefined as never,
+    },
+  ],
+  branch: {
+    uid: "0x121",
+  },
+  email: "waw",
+  password: "aw",
+  types: [],
+});
+
+console.log(JSON.stringify(mut));
 
 const q = db.query({
   x: {

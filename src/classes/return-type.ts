@@ -1,5 +1,5 @@
 import { PredicateType } from "../utils/pred-type";
-import { UnionToIntersection } from "../utils/types";
+import { AsArray, Nullable, UnionToIntersection } from "../utils/types";
 import { FragmentOpts, WithFragment } from "./fragment";
 import {
   BoolPredicate,
@@ -9,7 +9,6 @@ import {
   GoGeomTypes,
   IntPredicate,
   PasswordPredicate,
-  Predicate,
   PredicateInitOpts,
   StringPredicate,
   UidPredicate,
@@ -19,6 +18,11 @@ import {
 import { Forward, Relations, RelationsRecord, Reverse } from "./relations";
 import { ExtendedPredicates, Type, TypeRecord } from "./type";
 
+export type GeoType<GeoKey extends (typeof GoGeomTypes)[number]> = {
+  type: GeoKey;
+  coordinates: InferGeo<GeoKey>;
+};
+
 export type InferGeo<Geo extends (typeof GoGeomTypes)[number]> =
   Geo extends (typeof GoGeomTypes)[0]
     ? [number, number]
@@ -26,31 +30,26 @@ export type InferGeo<Geo extends (typeof GoGeomTypes)[number]> =
     ? [number, number][]
     : Geo extends (typeof GoGeomTypes)[4 | 5]
     ? [number, number][][]
-    : {
-        type: (typeof GoGeomTypes)[number];
-        coordinates: InferGeo<(typeof GoGeomTypes)[number]>;
-      }[];
+    : GeoType<(typeof GoGeomTypes)[number]>;
 
-export type InferLeafType<
-  P extends Predicate<PredicateInitOpts>,
-  Opts extends P["options"] = P["options"]
-> = Opts extends StringPredicate
-  ? Opts["fromValues"] extends Array<infer U>
-    ? U
-    : string
-  : Opts extends BoolPredicate
-  ? boolean
-  : Opts extends DateTimePredicate
-  ? Date
-  : Opts extends FloatPredicate
-  ? number
-  : Opts extends GeoPredicate
-  ? InferGeo<Opts["geoType"]>
-  : Opts extends IntPredicate
-  ? number
-  : Opts extends PasswordPredicate
-  ? boolean
-  : never;
+export type InferLeafType<Opts extends PredicateInitOpts> =
+  Opts extends StringPredicate
+    ? Opts["fromValues"] extends Array<infer U>
+      ? U
+      : string
+    : Opts extends BoolPredicate
+    ? boolean
+    : Opts extends DateTimePredicate
+    ? Date
+    : Opts extends FloatPredicate
+    ? number
+    : Opts extends GeoPredicate
+    ? InferGeo<Opts["geoType"]>
+    : Opts extends IntPredicate
+    ? number
+    : Opts extends PasswordPredicate
+    ? boolean
+    : never;
 
 export type PickleAllLeaf<T extends Type, EP extends ExtendedPredicates<T>> = {
   [key in keyof EP]: EP[key]["options"]["type"] extends
@@ -60,19 +59,27 @@ export type PickleAllLeaf<T extends Type, EP extends ExtendedPredicates<T>> = {
     : key;
 }[keyof EP];
 
-export type InferPredicateOpts<P extends Predicate<PredicateInitOpts>> =
-  P["options"]["asArray"] extends true
-    ? Array<InferLeafType<P>>
-    : P["options"]["nullable"] extends true
-    ? InferLeafType<P> | null | undefined
-    : InferLeafType<P>;
+export type InferPredicateOpts<Opts extends PredicateInitOpts> = Nullable<
+  Opts,
+  AsArray<Opts, InferLeafType<Opts>>
+>;
 
 export type PickLeaf<
   T extends Type,
   EP extends ExtendedPredicates<T> = ExtendedPredicates<T>
 > = {
-  [key in keyof Pick<EP, PickleAllLeaf<Type, EP>>]: InferPredicateOpts<EP[key]>;
+  [key in keyof Pick<EP, PickleAllLeaf<Type, EP>>]: InferPredicateOpts<
+    EP[key]["options"]
+  >;
 };
+
+export type InnerFragmentPreds<
+  TR extends TypeRecord,
+  TypeName extends keyof TR,
+  RR extends RelationsRecord<TR>,
+  FO extends FragmentOpts<TR, TypeName, RR>,
+  Opts extends PredicateInitOpts
+> = Nullable<Opts, AsArray<Opts, FragmentPreds<TR, TypeName, RR, FO>>>;
 
 export type FragmentPreds<
   TR extends TypeRecord,
@@ -89,20 +96,21 @@ export type FragmentPreds<
             ? key extends keyof RR[TypeName]["relations"]
               ? RR[TypeName]["relations"][key] extends Forward | Reverse
                 ? {
-                    [k in key]: EP[key]["options"]["asArray"] extends true
-                      ? PickLeaf<RR[TypeName]["relations"][key]["type"]>[]
-                      : PickLeaf<RR[TypeName]["relations"][key]["type"]>;
+                    [k in key]: AsArray<
+                      EP[key]["options"],
+                      PickLeaf<RR[TypeName]["relations"][key]["type"]>
+                    >;
                   }
                 : never
               : never
             : never
-          : { [k in key]: InferPredicateOpts<EP[key]> }
+          : { [k in key]: InferPredicateOpts<EP[key]["options"]> }
         : FO[key] extends ReturnType<typeof predOpts | typeof passwordOpts>
         ? FO[key]["alias"] extends string
           ? {
-              [k in FO[key]["alias"]]: InferPredicateOpts<EP[key]>;
+              [k in FO[key]["alias"]]: InferPredicateOpts<EP[key]["options"]>;
             }
-          : { [k in key]: InferPredicateOpts<EP[key]> }
+          : { [k in key]: InferPredicateOpts<EP[key]["options"]> }
         : RR[TypeName] extends Relations<TR[TypeName]>
         ? key extends keyof RR[TypeName]["relations"]
           ? RR[TypeName]["relations"][key] extends Forward | Reverse
@@ -114,43 +122,23 @@ export type FragmentPreds<
               ? FO[key]["opts"] extends ReturnType<typeof predOpts>
                 ? FO[key]["opts"]["alias"] extends string
                   ? {
-                      [k in FO[key]["opts"]["alias"]]: EP[key]["options"]["asArray"] extends true
-                        ? FragmentPreds<
-                            TR,
-                            RR[TypeName]["relations"][key]["type"]["name"],
-                            RR,
-                            FO[key]["with"]
-                          >[]
-                        : FragmentPreds<
-                            TR,
-                            RR[TypeName]["relations"][key]["type"]["name"],
-                            RR,
-                            FO[key]["with"]
-                          >;
+                      [k in FO[key]["opts"]["alias"]]: InnerFragmentPreds<
+                        TR,
+                        RR[TypeName]["relations"][key]["type"]["name"],
+                        RR,
+                        FO[key]["with"],
+                        EP[key]["options"]
+                      >;
                     }
                   : never
-                : // : {
-                  //     [k in key]: FragmentPreds<
-                  //       TR,
-                  //       RR[TypeName]["relations"][key]["type"]["name"],
-                  //       RR,
-                  //       FO[key]["with"]
-                  //     >;
-                  //   }
-                  {
-                    [k in key]: EP[key]["options"]["asArray"] extends true
-                      ? FragmentPreds<
-                          TR,
-                          RR[TypeName]["relations"][key]["type"]["name"],
-                          RR,
-                          FO[key]["with"]
-                        >[]
-                      : FragmentPreds<
-                          TR,
-                          RR[TypeName]["relations"][key]["type"]["name"],
-                          RR,
-                          FO[key]["with"]
-                        >;
+                : {
+                    [k in key]: InnerFragmentPreds<
+                      TR,
+                      RR[TypeName]["relations"][key]["type"]["name"],
+                      RR,
+                      FO[key]["with"],
+                      EP[key]["options"]
+                    >;
                   }
               : never
             : never

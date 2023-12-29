@@ -1,7 +1,9 @@
 import { DgraphClient, Operation } from "dgraph-js";
+import { PredicateType } from "..";
 import { Fragment, FragmentOpts } from "./fragment";
+import { DormInsert } from "./mutation";
 import { DormQuery, QueryOpts } from "./query";
-import { RelationsRecord } from "./relations";
+import { Forward, RelationsRecord, Reverse } from "./relations";
 import { TypeRecord } from "./type";
 
 export class Schema<
@@ -63,6 +65,49 @@ export class Schema<
 
   query<QO extends QueryOpts<TR, RR>>(queries: QO) {
     return new DormQuery<TR, RR, QO>(queries, this);
+  }
+
+  prepareMutation<key extends keyof TR, Mut extends DormInsert<TR, RR, key>>(
+    key: key,
+    mut: Mut
+  ) {
+    const vars: Record<string, unknown> = {};
+    const preds = this.types[key].extendedPreds();
+    for (const predKey in mut) {
+      let value: unknown = mut[predKey];
+
+      if (predKey === "uid") {
+        vars["uid"] = value;
+        continue;
+      }
+      if (predKey === "types") {
+        vars["dgraph.type"] = value;
+        continue;
+      }
+      if (value === undefined) {
+        continue;
+      }
+
+      const pred = preds[predKey];
+
+      if (pred.options.type === PredicateType.UID) {
+        const next = this.relations[key]!.relations[predKey as never]! as
+          | Forward
+          | Reverse;
+
+        const nextType = next.type.name;
+
+        value =
+          value instanceof Array
+            ? value.map((v) => this.prepareMutation(nextType, v as never))
+            : this.prepareMutation(nextType, value as never);
+      }
+      const mutKey = `${pred.typeName}.${predKey}`;
+
+      vars[mutKey] = value;
+    }
+
+    return vars;
   }
 }
 

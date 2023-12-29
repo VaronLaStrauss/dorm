@@ -1,4 +1,4 @@
-import { DgraphClient } from "dgraph-js";
+import { DgraphClient, Txn } from "dgraph-js";
 import { FilterValue, Query } from "../query-schema";
 import { Fragment, FragmentOpts } from "./fragment";
 import { RelationsRecord } from "./relations";
@@ -59,7 +59,7 @@ export class DormQuery<
   }
 
   async execute(
-    db: DgraphClient,
+    dbOrTxn: DgraphClient | Txn,
     outsourcedVars: Record<string, unknown> = {}
   ) {
     const vars: Record<string, unknown> = {};
@@ -83,7 +83,8 @@ export class DormQuery<
     console.log(query);
     console.log(vars);
 
-    const txn = db.newTxn({ readOnly: true });
+    const txn =
+      dbOrTxn instanceof Txn ? dbOrTxn : dbOrTxn.newTxn({ readOnly: true });
     let res: ReturnType<typeof txn.queryWithVars>;
     if (varDec.length) res = txn.queryWithVars(query, vars);
     else res = txn.query(query);

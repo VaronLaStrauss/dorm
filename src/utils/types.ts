@@ -1,4 +1,4 @@
-import { PredicateRecord } from "../classes/predicate";
+import { PredicateInitOpts, PredicateRecord } from "../classes/predicate";
 import { PredicateType } from "./pred-type";
 
 export type UnionToIntersection<U> = (
@@ -12,3 +12,13 @@ export type _PicklePredicates<PR extends PredicateRecord> = {
     ? key
     : never;
 }[keyof PR];
+
+export type AsArray<
+  Opts extends PredicateInitOpts,
+  V
+> = Opts["asArray"] extends true ? Array<V> : V;
+
+export type Nullable<
+  Opts extends PredicateInitOpts,
+  V
+> = Opts["nullable"] extends true ? V | null | undefined : V;
