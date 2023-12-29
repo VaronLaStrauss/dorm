@@ -98,7 +98,7 @@ const frag = db.fragment("Audit", {
 
 // console.log(frag.execute().user.audits);
 
-const mut = db.prepareMutation("User", {
+const mut = db.mutate("User", {
   activeType: "active",
   audits: [
     {

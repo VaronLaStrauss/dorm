@@ -1,11 +1,11 @@
-import { DgraphClient, Mutation, Operation, Txn } from "dgraph-js";
+import { DgraphClient, Latency, Mutation, Operation, Txn } from "dgraph-js";
 import { PredicateType } from "..";
 import { Fragment, FragmentOpts } from "./fragment";
 import { DormMutation } from "./mutation";
 import { DormQuery, QueryOpts } from "./query";
 import { Forward, RelationsRecord, Reverse } from "./relations";
 import { TypeRecord } from "./type";
-import { Latency, Metrics } from "dgraph-js/generated/api_pb";
+import { Metrics } from "./dgraph.types";
 
 export class Schema<
   TR extends TypeRecord = TypeRecord,
@@ -68,7 +68,7 @@ export class Schema<
     return new DormQuery<TR, RR, QO>(queries, this);
   }
 
-  async prepareMutation<
+  async mutate<
     key extends keyof TR,
     Mut extends DormMutation<TR, RR, key>,
     DbOrTxn extends DgraphClient | Txn | undefined = undefined
@@ -111,8 +111,8 @@ export class Schema<
 
         value =
           value instanceof Array
-            ? value.map((v) => this.prepareMutation(nextType, v as never))
-            : this.prepareMutation(nextType, value as never);
+            ? value.map((v) => this.mutate(nextType, v as never))
+            : this.mutate(nextType, value as never);
       }
       const mutKey = `${pred.typeName}.${predKey}`;
 
@@ -130,8 +130,8 @@ export class Schema<
       if (commit) await txn.commit();
 
       return {
-        metrics: res.getMetrics(),
-        latency: res.getLatency(),
+        metrics: res.getMetrics()?.toObject() as Metrics | undefined,
+        latency: res.getLatency()?.toObject() as Latency | undefined,
       };
     }
     return vars;

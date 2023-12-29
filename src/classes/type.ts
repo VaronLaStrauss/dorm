@@ -193,6 +193,8 @@ export class Type<
           innerPred = `# Incorrect implementation of ${innerPred}`;
         }
       }
+      if (this.name !== pred.typeName) outerPred = "";
+
       if (outerPred.trim().length) {
         outerPred += " .";
         outerPreds.push(outerPred);

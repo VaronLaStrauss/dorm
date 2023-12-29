@@ -2,7 +2,7 @@
   "name": "dorm",
   "module": "index.ts",
   "type": "module",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "devDependencies": {
     "bun-types": "latest"
   },
@@ -11,6 +11,6 @@
   },
   "dependencies": {
     "dgraph-js": "^21.3.1",
-    "elysia": "^0.7.24"
+    "elysia": "~0.8.0"
   }
 }
