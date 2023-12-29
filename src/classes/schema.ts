@@ -76,6 +76,7 @@ export class Schema<
     key: key,
     mut: Mut,
     dbOrTxn: DbOrTxn = undefined as DbOrTxn,
+    commit = true,
     del = false
   ): Promise<
     DbOrTxn extends undefined
@@ -126,7 +127,7 @@ export class Schema<
       else mut.setSetJson(vars);
 
       const res = await txn.mutate(mut);
-      if (dbOrTxn instanceof DgraphClient) await txn.commit();
+      if (commit) await txn.commit();
 
       return {
         metrics: res.getMetrics(),
