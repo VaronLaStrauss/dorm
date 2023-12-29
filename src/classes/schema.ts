@@ -126,6 +126,8 @@ export class Schema<
       else mut.setSetJson(vars);
 
       const res = await txn.mutate(mut);
+      if (dbOrTxn instanceof DgraphClient) await txn.commit();
+
       return {
         metrics: res.getMetrics(),
         latency: res.getLatency(),
