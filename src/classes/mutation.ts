@@ -136,26 +136,13 @@ export type InferMutation<
 > = MutationNonNullableFields<TR, RR, TypeName> &
   MutationNullableFields<TR, RR, TypeName>;
 
-export type DormInsert<
+export type DormMutation<
   TR extends TypeRecord,
   RR extends RelationsRecord<TR>,
   TypeName extends keyof TR
-> = InferMutation<TR, RR, TypeName> & { types: string | string[] };
-
-export type DormUpdate<
-  TR extends TypeRecord,
-  RR extends RelationsRecord<TR>,
-  TypeName extends keyof TR
-> = Partial<InferMutation<TR, RR, TypeName>> & {
-  uid: string;
-  types?: string | string[];
-};
-
-export type DormDelete<
-  TR extends TypeRecord,
-  RR extends RelationsRecord<TR>,
-  TypeName extends keyof TR
-> = Partial<InferMutation<TR, RR, TypeName>> & {
-  uid: string;
-  types?: string | string[];
-};
+> =
+  | (InferMutation<TR, RR, TypeName> & { types: string | string[] })
+  | (Partial<InferMutation<TR, RR, TypeName>> & {
+      uid: string;
+      types?: string | [];
+    });

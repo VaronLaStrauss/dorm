@@ -93,7 +93,7 @@ export class DormQuery<
 
     return {
       data: data.getJson() as QueryReturn<TR, RR, QO>,
-      metris: data.getMetrics(),
+      metrics: data.getMetrics(),
       latency: data.getLatency(),
     };
   }

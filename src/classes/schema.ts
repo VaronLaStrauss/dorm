@@ -1,10 +1,11 @@
-import { DgraphClient, Operation } from "dgraph-js";
+import { DgraphClient, Mutation, Operation, Txn } from "dgraph-js";
 import { PredicateType } from "..";
 import { Fragment, FragmentOpts } from "./fragment";
-import { DormInsert } from "./mutation";
+import { DormMutation } from "./mutation";
 import { DormQuery, QueryOpts } from "./query";
 import { Forward, RelationsRecord, Reverse } from "./relations";
 import { TypeRecord } from "./type";
+import { Latency, Metrics } from "dgraph-js/generated/api_pb";
 
 export class Schema<
   TR extends TypeRecord = TypeRecord,
@@ -67,10 +68,20 @@ export class Schema<
     return new DormQuery<TR, RR, QO>(queries, this);
   }
 
-  prepareMutation<key extends keyof TR, Mut extends DormInsert<TR, RR, key>>(
+  async prepareMutation<
+    key extends keyof TR,
+    Mut extends DormMutation<TR, RR, key>,
+    DbOrTxn extends DgraphClient | Txn | undefined = undefined
+  >(
     key: key,
-    mut: Mut
-  ) {
+    mut: Mut,
+    dbOrTxn: DbOrTxn = undefined as DbOrTxn,
+    del = false
+  ): Promise<
+    DbOrTxn extends undefined
+      ? Record<string, unknown>
+      : { metrics?: Metrics; latency?: Latency }
+  > {
     const vars: Record<string, unknown> = {};
     const preds = this.types[key].extendedPreds();
     for (const predKey in mut) {
@@ -107,6 +118,19 @@ export class Schema<
       vars[mutKey] = value;
     }
 
+    if (dbOrTxn) {
+      const txn = dbOrTxn instanceof Txn ? dbOrTxn : dbOrTxn.newTxn();
+      const mut = new Mutation();
+
+      if (del) mut.setDeleteJson(vars);
+      else mut.setSetJson(vars);
+
+      const res = await txn.mutate(mut);
+      return {
+        metrics: res.getMetrics(),
+        latency: res.getLatency(),
+      };
+    }
     return vars;
   }
 }
