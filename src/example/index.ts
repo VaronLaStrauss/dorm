@@ -1,9 +1,9 @@
 import { none } from "..";
 import { PredicateType } from "../utils/pred-type";
-import { fromValues, passwordOpts, predicate } from "./predicate";
-import { forward, relations, reverse } from "./relations";
-import { schema } from "./schema";
-import { createType } from "./type";
+import { fromValues, passwordOpts, predicate } from "../classes/predicate";
+import { forward, relations, reverse } from "../classes/relations";
+import { schema } from "../classes/schema";
+import { createType } from "../classes/type";
 
 const Human = createType("Human", {
   name: predicate({
@@ -18,13 +18,13 @@ const Human = createType("Human", {
 });
 
 const Employee = createType("Employee", {
-  branch: predicate({ type: PredicateType.UID }),
+  branch: predicate({ type: PredicateType.NODE }),
 }).extends(Human);
 
 const User = createType("User", {
   email: predicate({ type: PredicateType.STRING }),
   password: predicate({ type: PredicateType.PASSWORD }),
-  audits: predicate({ type: PredicateType.UID, asArray: true }),
+  audits: predicate({ type: PredicateType.NODE, asArray: true }),
 }).extends(Employee);
 
 const Branch = createType("Branch", {
@@ -32,7 +32,7 @@ const Branch = createType("Branch", {
 });
 
 const Audit = createType("Audit", {
-  user: predicate({ type: PredicateType.UID }),
+  user: predicate({ type: PredicateType.NODE }),
   date: predicate({ type: PredicateType.DATETIME, indexes: ["hour"] }),
 });
 
@@ -68,6 +68,8 @@ const frag = db.fragment("Audit", {
     with: {
       password: passwordOpts("$pass1"),
       activeType: true,
+      uid: true,
+      type: true,
       branch: {
         with: {
           name: true,
@@ -97,23 +99,29 @@ const frag = db.fragment("Audit", {
   },
 });
 
-// console.log(frag.execute().user.audits);
+// console.log(frag.execute().user.branch.);
+// console.log(frag.fragment);
 
 const mut = db.mutate("User", {
   activeType: "active",
   audits: [
     {
       date: "",
-      types: "",
       user: none(),
+      type: ["waw"],
+      // uid: ''
     },
   ],
+  // audits: none(),
   branch: {
     uid: "0x121",
   },
   email: "waw",
   password: "aw",
-  types: [],
+  type: [],
+  // uid: "",
+  // name: "wa",
+  // uid: 'waw'
 });
 
 console.log(JSON.stringify(mut));
@@ -124,9 +132,9 @@ const q = db.query({
     mainFunc: { op: "type", value: "Audit" },
   },
 });
-console.log(await q.execute(undefined as never, { $pass1: "waw" }));
+// console.log(await q.execute(undefined as never, { $pass1: "waw" }));
 
-console.log(db.build());
+// console.log(db.build());
 
 // const userFilter = allowedFilter(User, "name", 'waw');
 // const employeeFilter = allowedFilter(Employee, "name", 'waw');
