@@ -1,3 +1,4 @@
+import { none } from "..";
 import { PredicateType } from "../utils/pred-type";
 import { fromValues, passwordOpts, predicate } from "./predicate";
 import { forward, relations, reverse } from "./relations";
@@ -104,7 +105,7 @@ const mut = db.mutate("User", {
     {
       date: "",
       types: "",
-      user: undefined as never,
+      user: none(),
     },
   ],
   branch: {

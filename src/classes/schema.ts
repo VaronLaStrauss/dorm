@@ -119,8 +119,11 @@ export class Schema<
       vars[mutKey] = value;
     }
 
-    if (dbOrTxn) {
-      const txn = dbOrTxn instanceof Txn ? dbOrTxn : dbOrTxn.newTxn();
+    if (!dbOrTxn) return vars;
+
+    {
+      const txn =
+        dbOrTxn instanceof DgraphClient ? dbOrTxn.newTxn() : (dbOrTxn as Txn);
       const mut = new Mutation();
 
       if (del) mut.setDeleteJson(vars);
@@ -134,7 +137,6 @@ export class Schema<
         latency: res.getLatency()?.toObject() as Latency | undefined,
       };
     }
-    return vars;
   }
 }
 

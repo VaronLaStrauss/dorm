@@ -14,7 +14,7 @@ import {
   Type,
   TypeRecord,
 } from ".";
-import { AsArray, Nullable, PredicateType } from "..";
+import { AsArray, Nullable, PredicateType, UnionToIntersection } from "..";
 
 export type InferMutationLeaf<Opts extends PredicateInitOpts> = Opts extends
   | FloatPredicate
@@ -40,17 +40,7 @@ export type InsertMutationUidOpts<
   RR extends RelationsRecord<TR>,
   ThisKey extends keyof TR,
   Opts extends PredicateInitOpts
-> = Nullable<
-  Opts,
-  AsArray<
-    Opts,
-    | (InferMutation<TR, RR, ThisKey> & { types: string | string[] })
-    | (Partial<InferMutation<TR, RR, ThisKey>> & {
-        uid: string;
-        types?: string | string[];
-      })
-  >
->;
+> = Nullable<Opts, AsArray<Opts, DormMutation<TR, RR, ThisKey>>>;
 
 export type PickleNullableFields<
   TR extends TypeRecord,
@@ -141,7 +131,9 @@ export type DormMutation<
   RR extends RelationsRecord<TR>,
   TypeName extends keyof TR
 > =
-  | (InferMutation<TR, RR, TypeName> & { types: string | string[] })
+  | (UnionToIntersection<InferMutation<TR, RR, TypeName>> & {
+      types: string | string[];
+    })
   | (Partial<InferMutation<TR, RR, TypeName>> & {
       uid: string;
       types?: string | [];

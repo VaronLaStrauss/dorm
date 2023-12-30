@@ -66,3 +66,7 @@ export function spacing(level: number) {
     .map(() => "  ")
     .join("");
 }
+
+export function none() {
+  return undefined as never;
+}

@@ -80,11 +80,10 @@ export class DormQuery<
     if (varDec.length) query += `(${varDec.join(", ")})`;
     query += `{\n${queries.join("\n")}\n}`;
 
-    console.log(query);
-    console.log(vars);
-
     const txn =
-      dbOrTxn instanceof Txn ? dbOrTxn : dbOrTxn.newTxn({ readOnly: true });
+      dbOrTxn instanceof DgraphClient
+        ? dbOrTxn.newTxn({ readOnly: true })
+        : dbOrTxn;
     let res: ReturnType<typeof txn.queryWithVars>;
     if (varDec.length) res = txn.queryWithVars(query, vars);
     else res = txn.query(query);
