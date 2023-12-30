@@ -8,7 +8,7 @@ import {
 import { PredicateType, spacing } from "../utils";
 import { UnionToIntersection } from "../utils/types";
 import { compileDirectives, forwardReverseType } from "./compiler";
-import { PredOpts, PredicateRecord } from "./predicate";
+import { PredOpts, PredicateRecord, predicate } from "./predicate";
 
 export type ExtendedTypes = Array<Type>;
 
@@ -51,37 +51,48 @@ export class Type<
     relations: RelationsRecord<TR>,
     usedVars: Map<string, unknown>,
     hasOrTypeValues: Set<string>,
-    space = 1,
-    appendOnly = false
+    space = 1
   ) {
-    const _space = spacing(space);
     const preds = this.extendedPreds();
-    const inners: string[] = [
-      ...(!appendOnly ? [`${_space}uid`, `${_space}type: dgraph.type`] : []),
-    ];
+    const inners: string[] = [];
     const relation = relations[this.name]!;
 
     for (const predKey in opts) {
       const predOpt = opts[predKey];
       const pred = preds[predKey];
-      if (pred.options.type === PredicateType.UID) {
-        const { type } = relation.relations[predKey as never] as {
-          type: Type;
-        };
 
-        const inner = type.build(
-          this.name,
+      if (
+        pred.options.type === PredicateType.UID ||
+        pred.options.type === PredicateType.TYPE
+      ) {
+        const inner = pred.buildStatic(
           predKey,
-          predOpt as WithFragment<never, never, never>,
-          relations,
-          usedVars,
-          hasOrTypeValues,
+          predOpt as PredOpts | boolean,
           space
         );
         inners.push(inner);
         continue;
       }
-      const inner = pred.build(predKey, predOpt as PredOpts, usedVars, space);
+
+      if (pred.options.type !== PredicateType.NODE) {
+        const inner = pred.build(predKey, predOpt as PredOpts, usedVars, space);
+        inners.push(inner);
+        continue;
+      }
+
+      const { type } = relation.relations[predKey as never] as {
+        type: Type;
+      };
+
+      const inner = type.build(
+        this.name,
+        predKey,
+        predOpt as WithFragment<never, never, never>,
+        relations,
+        usedVars,
+        hasOrTypeValues,
+        space
+      );
       inners.push(inner);
     }
     return inners.join("\n");
@@ -92,8 +103,15 @@ export class Type<
     const inners: string[] = [];
     for (const predKey in preds) {
       const pred = preds[predKey];
-      if (pred.options.type === PredicateType.UID) continue;
-      inners.push(pred.build(predKey, true, usedVars, space));
+      const {
+        options: { type },
+      } = pred;
+      if (type === PredicateType.NODE) continue;
+      const inner =
+        type === PredicateType.UID || type === PredicateType.TYPE
+          ? pred.buildStatic(predKey, true, space)
+          : pred.build(predKey, true, usedVars, space);
+      inners.push(inner);
     }
 
     return inners.join("\n");
@@ -158,6 +176,8 @@ export class Type<
         typeName,
       } = pred;
 
+      if (type === PredicateType.UID || type === PredicateType.TYPE) continue;
+
       const typeDeclaration = `${typeName}.${predKey}`;
 
       const predType = asArray ? `[${type}]` : type;
@@ -176,7 +196,7 @@ export class Type<
       if (count) outerPred += ` @count`;
 
       let innerPred = typeDeclaration;
-      if (type === PredicateType.UID) {
+      if (type === PredicateType.NODE) {
         const rels = relations[pred.typeName];
         const rel = rels?.relations[predKey as never]! as Forward | Reverse;
 
@@ -236,7 +256,11 @@ export function createType<TypeName extends string, PR extends PredicateRecord>(
   typeName: TypeName,
   preds: PR
 ) {
-  return new Type(typeName, preds);
+  return new Type(typeName, {
+    ...preds,
+    uid: predicate({ type: PredicateType.UID }),
+    type: predicate({ type: PredicateType.TYPE }),
+  });
 }
 
 export type TypeRecord = Record<string, Type | ExtendedType>;

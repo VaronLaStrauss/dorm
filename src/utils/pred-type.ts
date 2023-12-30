@@ -6,5 +6,7 @@ export enum PredicateType {
   GEO = "geo",
   DATETIME = "dateTime",
   PASSWORD = "password",
+  NODE = "node",
   UID = "uid",
+  TYPE = "dgraph.type",
 }

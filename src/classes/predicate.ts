@@ -10,13 +10,18 @@ export type Pred =
   | GeoPredicate
   | DateTimePredicate
   | StringPredicate
-  | UidPredicate;
+  | NodePredicate
+  | StaticPredicate;
 
 export type PredicateInitOpts = {
   count?: true;
   nullable?: true;
   asArray?: true;
 } & Pred;
+
+export type StaticPredicate = {
+  type: PredicateType.UID | PredicateType.TYPE;
+};
 
 export type StringPredicate = {
   indexes?: (keyof typeof StringIndex)[];
@@ -29,8 +34,8 @@ export type DateTimePredicate = {
   type: PredicateType.DATETIME;
 };
 
-export type UidPredicate = {
-  type: PredicateType.UID;
+export type NodePredicate = {
+  type: PredicateType.NODE;
 };
 
 export type PasswordPredicate = {
@@ -76,6 +81,18 @@ export class Predicate<PIO extends PredicateInitOpts> {
   typeName = "";
 
   constructor(public options: PIO) {}
+
+  buildStatic(predName: string, opts: PredOpts | boolean, space: number) {
+    const _space = spacing(space);
+    if (typeof opts === "boolean") {
+      return `${_space}${predName}: ${this.options.type}`;
+    }
+
+    const { alias, asVar } = opts;
+
+    const _asVar = asVar ? ` as ${asVar}` : "";
+    return `${_space}${alias ?? predName}: ${this.options.type}${_asVar}`;
+  }
 
   build(
     predName: string,

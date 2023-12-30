@@ -21,7 +21,7 @@ export type FragmentOpts<
   EP extends ExtendedPredicates<TR[TypeName]> = ExtendedPredicates<TR[TypeName]>
 > = {
   [key in keyof EP]?: {
-    [k in key]: EP[key]["options"]["type"] extends PredicateType.UID
+    [k in key]: EP[key]["options"]["type"] extends PredicateType.NODE
       ? TypeName extends keyof RR
         ? RR[TypeName] extends Relations<TR[TypeName]>
           ? key extends keyof RR[TypeName]["relations"]
@@ -65,8 +65,7 @@ export class Fragment<
       relations,
       this.usedVars,
       this.schema.hasOrTypeValues,
-      2,
-      true
+      2
     );
     const f = this.fragment + `\n${fragment}`;
     return new Fragment<

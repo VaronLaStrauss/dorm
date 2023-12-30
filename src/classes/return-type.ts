@@ -11,7 +11,7 @@ import {
   PasswordPredicate,
   PredicateInitOpts,
   StringPredicate,
-  UidPredicate,
+  NodePredicate,
   passwordOpts,
   predOpts,
 } from "./predicate";
@@ -49,11 +49,13 @@ export type InferLeafType<Opts extends PredicateInitOpts> =
     ? number
     : Opts extends PasswordPredicate
     ? boolean
-    : never;
+    : Opts["type"] extends PredicateType.UID
+    ? string
+    : string[];
 
 export type PickleAllLeaf<T extends Type, EP extends ExtendedPredicates<T>> = {
   [key in keyof EP]: EP[key]["options"]["type"] extends
-    | PredicateType.UID
+    | PredicateType.NODE
     | PredicateType.PASSWORD
     ? never
     : key;
@@ -91,7 +93,7 @@ export type FragmentPreds<
   {
     [key in keyof FO]: key extends keyof EP
       ? FO[key] extends true
-        ? EP[key]["options"] extends UidPredicate
+        ? EP[key]["options"] extends NodePredicate
           ? RR[TypeName] extends Relations<TR[TypeName]>
             ? key extends keyof RR[TypeName]["relations"]
               ? RR[TypeName]["relations"][key] extends Forward | Reverse
@@ -146,4 +148,4 @@ export type FragmentPreds<
         : never
       : never;
   }[keyof FO]
-> & { uid: string; type: string[] };
+>;

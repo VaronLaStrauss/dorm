@@ -1,11 +1,10 @@
-import { DgraphClient, Latency, Mutation, Operation, Txn } from "dgraph-js";
+import { DgraphClient, Operation } from "dgraph-js";
 import { PredicateType } from "..";
 import { Fragment, FragmentOpts } from "./fragment";
-import { DormMutation } from "./mutation";
+import { DormMutation, MutClass } from "./mutation";
 import { DormQuery, QueryOpts } from "./query";
 import { Forward, RelationsRecord, Reverse } from "./relations";
 import { TypeRecord } from "./type";
-import { Metrics } from "./dgraph.types";
 
 export class Schema<
   TR extends TypeRecord = TypeRecord,
@@ -68,21 +67,10 @@ export class Schema<
     return new DormQuery<TR, RR, QO>(queries, this);
   }
 
-  async mutate<
-    key extends keyof TR,
-    Mut extends DormMutation<TR, RR, key>,
-    DbOrTxn extends DgraphClient | Txn | undefined = undefined
-  >(
+  private _mutate<key extends keyof TR, Mut extends DormMutation<TR, RR, key>>(
     key: key,
-    mut: Mut,
-    dbOrTxn: DbOrTxn = undefined as DbOrTxn,
-    commit = true,
-    del = false
-  ): Promise<
-    DbOrTxn extends undefined
-      ? Record<string, unknown>
-      : { metrics?: Metrics; latency?: Latency }
-  > {
+    mut: Mut
+  ) {
     const vars: Record<string, unknown> = {};
     const preds = this.types[key].extendedPreds();
     for (const predKey in mut) {
@@ -92,7 +80,7 @@ export class Schema<
         vars["uid"] = value;
         continue;
       }
-      if (predKey === "types") {
+      if (predKey === "type") {
         vars["dgraph.type"] = value;
         continue;
       }
@@ -102,7 +90,7 @@ export class Schema<
 
       const pred = preds[predKey];
 
-      if (pred.options.type === PredicateType.UID) {
+      if (pred.options.type === PredicateType.NODE) {
         const next = this.relations[key]!.relations[predKey as never]! as
           | Forward
           | Reverse;
@@ -111,32 +99,22 @@ export class Schema<
 
         value =
           value instanceof Array
-            ? value.map((v) => this.mutate(nextType, v as never))
-            : this.mutate(nextType, value as never);
+            ? value.map((v) => this._mutate(nextType, v as never))
+            : this._mutate(nextType, value as never);
       }
       const mutKey = `${pred.typeName}.${predKey}`;
 
       vars[mutKey] = value;
     }
 
-    if (!dbOrTxn) return vars;
+    return vars;
+  }
 
-    {
-      const txn =
-        dbOrTxn instanceof DgraphClient ? dbOrTxn.newTxn() : (dbOrTxn as Txn);
-      const mut = new Mutation();
-
-      if (del) mut.setDeleteJson(vars);
-      else mut.setSetJson(vars);
-
-      const res = await txn.mutate(mut);
-      if (commit) await txn.commit();
-
-      return {
-        metrics: res.getMetrics()?.toObject() as Metrics | undefined,
-        latency: res.getLatency()?.toObject() as Latency | undefined,
-      };
-    }
+  mutate<key extends keyof TR, Mut extends DormMutation<TR, RR, key>>(
+    key: key,
+    mut: Mut
+  ) {
+    return new MutClass(this._mutate(key, mut));
   }
 }
 

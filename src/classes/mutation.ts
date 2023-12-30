@@ -1,8 +1,10 @@
+import { DgraphClient, Latency, Mutation, Txn } from "dgraph-js";
 import {
   BoolPredicate,
   DateTimePredicate,
   ExtendedPredicates,
   FloatPredicate,
+  GeoPredicate,
   GeoType,
   GoGeomTypes,
   IntPredicate,
@@ -10,11 +12,13 @@ import {
   PredicateInitOpts,
   Relations,
   RelationsRecord,
+  StaticPredicate,
   StringPredicate,
   Type,
   TypeRecord,
 } from ".";
-import { AsArray, Nullable, PredicateType, UnionToIntersection } from "..";
+import { AsArray, Nullable, PredicateType } from "..";
+import { Metrics } from "./dgraph.types";
 
 export type InferMutationLeaf<Opts extends PredicateInitOpts> = Opts extends
   | FloatPredicate
@@ -28,7 +32,11 @@ export type InferMutationLeaf<Opts extends PredicateInitOpts> = Opts extends
     : string
   : Opts extends BoolPredicate
   ? boolean
-  : GeoType<(typeof GoGeomTypes)[number]>;
+  : Opts extends GeoPredicate
+  ? GeoType<(typeof GoGeomTypes)[number]>
+  : Opts["type"] extends PredicateType.UID
+  ? string
+  : string[] | string;
 
 export type MutationLeafOpts<Opts extends PredicateInitOpts> = Nullable<
   Opts,
@@ -39,25 +47,28 @@ export type InsertMutationUidOpts<
   TR extends TypeRecord,
   RR extends RelationsRecord<TR>,
   ThisKey extends keyof TR,
-  Opts extends PredicateInitOpts
-> = Nullable<Opts, AsArray<Opts, DormMutation<TR, RR, ThisKey>>>;
+  Opts extends PredicateInitOpts,
+  PrevType extends Type | undefined
+> = Nullable<Opts, AsArray<Opts, DormMutation<TR, RR, ThisKey, PrevType>>>;
 
 export type PickleNullableFields<
   TR extends TypeRecord,
   RR extends RelationsRecord<TR>,
   TypeName extends keyof TR,
-  PrevType extends Type | undefined = undefined,
+  PrevType extends Type | undefined,
   EP extends ExtendedPredicates<TR[TypeName]> = ExtendedPredicates<TR[TypeName]>
 > = {
   [key in keyof EP]: EP[key]["options"]["nullable"] extends true
     ? key
-    : EP[key]["options"]["type"] extends PredicateType.UID
+    : EP[key]["options"] extends StaticPredicate
+    ? key
+    : EP[key]["options"]["type"] extends PredicateType.NODE
     ? TypeName extends keyof RR
       ? RR[TypeName] extends Relations<TR[TypeName]>
         ? key extends keyof RR[TypeName]["relations"]
           ? RR[TypeName]["relations"][key]["type"] extends PrevType
-            ? key
-            : never
+            ? never
+            : key
           : never
         : never
       : never
@@ -69,7 +80,11 @@ export type PickleNonNullableFields<
   TypeName extends keyof TR,
   EP extends ExtendedPredicates<TR[TypeName]> = ExtendedPredicates<TR[TypeName]>
 > = {
-  [key in keyof EP]: EP[key]["options"]["nullable"] extends true ? never : key;
+  [key in keyof EP]: EP[key]["options"] extends StaticPredicate
+    ? never
+    : EP[key]["options"]["nullable"] extends true
+    ? never
+    : key;
 }[keyof EP];
 
 export type _InferMutation<
@@ -78,7 +93,7 @@ export type _InferMutation<
   TypeName extends keyof TR,
   key extends keyof EP,
   EP extends ExtendedPredicates<TR[TypeName]> = ExtendedPredicates<TR[TypeName]>
-> = EP[key]["options"]["type"] extends PredicateType.UID
+> = EP[key]["options"]["type"] extends PredicateType.NODE
   ? TypeName extends keyof RR
     ? RR[TypeName] extends Relations<TR[TypeName]>
       ? key extends keyof RR[TypeName]["relations"]
@@ -87,7 +102,8 @@ export type _InferMutation<
               TR,
               RR,
               RR[TypeName]["relations"][key]["type"]["name"],
-              EP[key]["options"]
+              EP[key]["options"],
+              TR[TypeName]
             >
           : never
         : never
@@ -99,11 +115,12 @@ export type MutationNullableFields<
   TR extends TypeRecord,
   RR extends RelationsRecord<TR>,
   TypeName extends keyof TR,
+  PrevType extends Type | undefined,
   EP extends ExtendedPredicates<TR[TypeName]> = ExtendedPredicates<TR[TypeName]>
 > = {
   [key in keyof Pick<
     EP,
-    PickleNullableFields<TR, RR, TypeName>
+    PickleNullableFields<TR, RR, TypeName, PrevType>
   >]?: _InferMutation<TR, RR, TypeName, key>;
 };
 
@@ -122,19 +139,42 @@ export type MutationNonNullableFields<
 export type InferMutation<
   TR extends TypeRecord,
   RR extends RelationsRecord<TR>,
-  TypeName extends keyof TR
+  TypeName extends keyof TR,
+  PrevType extends Type | undefined = undefined
 > = MutationNonNullableFields<TR, RR, TypeName> &
-  MutationNullableFields<TR, RR, TypeName>;
+  MutationNullableFields<TR, RR, TypeName, PrevType>;
 
 export type DormMutation<
   TR extends TypeRecord,
   RR extends RelationsRecord<TR>,
-  TypeName extends keyof TR
+  TypeName extends keyof TR,
+  PrevType extends Type | undefined = undefined
 > =
-  | (UnionToIntersection<InferMutation<TR, RR, TypeName>> & {
-      types: string | string[];
+  | (InferMutation<TR, RR, TypeName, PrevType> & {
+      type: string[];
     })
-  | (Partial<InferMutation<TR, RR, TypeName>> & {
+  | (Partial<InferMutation<TR, RR, TypeName, PrevType>> & {
       uid: string;
-      types?: string | [];
+      type?: string[];
     });
+
+export class MutClass {
+  constructor(private vars: Record<string, unknown>) {}
+
+  async execute(dbOrTxn: DgraphClient | Txn, commit = true, del = false) {
+    const txn =
+      dbOrTxn instanceof DgraphClient ? dbOrTxn.newTxn() : (dbOrTxn as Txn);
+    const mutx = new Mutation();
+
+    if (del) mutx.setDeleteJson(this.vars);
+    else mutx.setSetJson(this.vars);
+
+    const res = await txn.mutate(mutx);
+    if (commit) await txn.commit();
+
+    return {
+      metrics: res.getMetrics()?.toObject() as Metrics | undefined,
+      latency: res.getLatency()?.toObject() as Latency | undefined,
+    };
+  }
+}

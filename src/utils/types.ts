@@ -8,7 +8,7 @@ export type UnionToIntersection<U> = (
   : never;
 
 export type _PicklePredicates<PR extends PredicateRecord> = {
-  [key in keyof PR]: PR[key]["options"]["type"] extends PredicateType.UID
+  [key in keyof PR]: PR[key]["options"]["type"] extends PredicateType.NODE
     ? key
     : never;
 }[keyof PR];
