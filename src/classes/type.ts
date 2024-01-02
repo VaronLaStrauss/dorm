@@ -193,10 +193,11 @@ export class Type<
         outerPred += ` @index(${indexes.join(", ")})`;
       }
 
-      if (count) outerPred += ` @count`;
-
       let innerPred = typeDeclaration;
       if (type === PredicateType.NODE) {
+        const predType = asArray ? "[uid]" : "uid";
+        outerPred = `${typeDeclaration}: ${predType}`;
+
         const rels = relations[pred.typeName];
         const rel = rels?.relations[predKey as never]! as Forward | Reverse;
 
@@ -213,6 +214,8 @@ export class Type<
           innerPred = `# Incorrect implementation of ${innerPred}`;
         }
       }
+
+      if (count) outerPred += ` @count`;
       if (this.name !== pred.typeName) outerPred = "";
 
       if (outerPred.trim().length) {
