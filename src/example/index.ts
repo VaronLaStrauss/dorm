@@ -67,7 +67,7 @@ const PsgcType = fromValues(
 
 const Psgc = createType("Psgc", {
   code: predicate({ type: PredicateType.STRING }),
-  parent: predicate({ type: PredicateType.NODE }),
+  parent: predicate({ type: PredicateType.NODE, nullable: true }),
   children: predicate({ type: PredicateType.NODE, asArray: true }),
   name: predicate({ type: PredicateType.STRING }),
   placeType: predicate({
@@ -101,7 +101,7 @@ const frag = db.fragment("Audit", {
   user: {
     with: {
       password: passwordOpts("$pass1"),
-      activeType: predOpts(undefined, "waw"),
+      activeType: predOpts("yeey", "waw"),
       uid: true,
       dtype: true,
       branch: {
@@ -134,7 +134,7 @@ const frag = db.fragment("Audit", {
 });
 
 // console.log(frag.execute().user.branch.);
-console.log(frag.fragment);
+// console.log(frag.fragment);
 
 const mut = db.mutate("User", {
   activeType: "active",
@@ -158,16 +158,14 @@ const mut = db.mutate("User", {
   // uid: 'waw'
 });
 
-console.log(JSON.stringify(mut));
-
-console.log(170, frag.append({ date: true }).allowedValues);
-const q = db.query({
-  x: {
-    fragment: frag.append({ date: true }),
-    mainFunc: { op: "uid", value: "waw" },
-  },
-});
-console.log(q.build({}).query);
+// console.log(JSON.stringify(mut));
+// const q = db.query({
+//   x: {
+//     fragment: frag.append({ date: true }),
+//     mainFunc: { op: "uid", value: "waw" },
+//   },
+// });
+// console.log(q.build({}).query);
 
 // console.log(await q.execute(undefined as never, { $pass1: "waw" }));
 
@@ -180,26 +178,28 @@ console.log(q.build({}).query);
 // const y = filterValueReqSchema([dateFilter]);
 // type Y = Static<typeof y>;
 
-// const PsgcRootFrag = db.fragment(
-//   "Psgc",
-//   {
-//     code: true,
-//     name: true,
-//     placeType: true,
-//     uid: true,
-//     parent: {},
-//   },
-//   true
-// );
+const PsgcRootFrag = db.fragment(
+  "Psgc",
+  {
+    code: true,
+    name: true,
+    placeType: true,
+    uid: true,
+    parent: true,
+  },
+  true
+);
 
-// console.log(
-//   db
-//     .query({
-//       x: {
-//         fragment: PsgcRootFrag,
-//         recurse: true,
-//         mainFunc: { op: "type", value: "Psgc" },
-//       },
-//     })
-//     .build("x").query
-// );
+// console.log(PsgcRootFrag.execute().parent);
+
+console.log(
+  db
+    .query({
+      x: {
+        fragment: PsgcRootFrag,
+        recurse: true,
+        mainFunc: { op: "type", value: "Psgc" },
+      },
+    })
+    .build().query
+);

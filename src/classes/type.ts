@@ -37,7 +37,7 @@ export class Type<
     usedVars: Map<string, unknown>,
     allowedValues: Set<string>,
     space = 1,
-    asRecurse?: boolean
+    asRecurse?: Set<Type>
   ) {
     const preds = this.extendedPreds();
     const inners: string[] = [];
@@ -123,7 +123,7 @@ export class Type<
     usedVars: Map<string, unknown>,
     allowedValues: Set<string>,
     space = 1,
-    asRecurse?: boolean
+    asRecurse?: Set<Type>
   ): string {
     const _space = spacing(space);
     const relation = relations[typeName]!.relations[predName as never] as
@@ -131,16 +131,18 @@ export class Type<
       | Reverse;
 
     if (typeof withFrag === "boolean") {
-      const builtPreds = this.buildAllLeafPreds(
-        usedVars,
-        allowedValues,
-        space + 1
-      );
       const relationStr = forwardReverseType(
         typeName,
         predName,
         relation,
         allowedValues
+      );
+      if (asRecurse?.has(relation.type)) return `${_space}${relationStr}`;
+
+      const builtPreds = this.buildAllLeafPreds(
+        usedVars,
+        allowedValues,
+        space + 1
       );
       if (asRecurse) return `${_space}${relationStr}\n${builtPreds}`;
 
@@ -163,7 +165,8 @@ export class Type<
       allowedValues
     );
 
-    if (!w) return `${_space}${relationStr} ${directives} `;
+    if (!w || asRecurse?.has(relation.type))
+      return `${_space}${relationStr} ${directives}`;
 
     const builtPreds = this.buildPreds(
       w,
@@ -174,8 +177,10 @@ export class Type<
       asRecurse
     );
 
-    if (asRecurse)
+    if (asRecurse) {
+      asRecurse.add(relation.type);
       return `${_space}${relationStr} ${directives}\n${builtPreds}`;
+    }
 
     return `${_space}${relationStr} ${directives} {\n${builtPreds}\n${_space}}`;
   }

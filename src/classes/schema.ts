@@ -1,5 +1,5 @@
 import { DgraphClient, Operation } from "dgraph-js";
-import { TypeRecord, Fragment, DormQuery, Forward, Reverse } from ".";
+import { TypeRecord, Fragment, DormQuery, Forward, Reverse, Type } from ".";
 import { PredicateType } from "..";
 import {
   RelationsRecord,
@@ -57,13 +57,14 @@ export class Schema<
   ): Fragment<TR, RR, key, FO> {
     const type = this.types[typeName];
     const allowedValues = new Set(this.allowedValues);
+
     const fragment = type.buildPreds<TR, key>(
       fragmentOpts as never,
       this.relations,
       usedVars,
       allowedValues,
       2,
-      asRecurse
+      asRecurse ? new Set<Type>([type]) : undefined
     );
 
     return new Fragment<TR, RR, key, FO>(

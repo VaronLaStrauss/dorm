@@ -48,7 +48,7 @@ export class DormQuery<
     return { query, usedVars };
   }
 
-  build(outsourcedVars: Record<string, unknown>) {
+  build(outsourcedVars: Record<string, unknown> = {}) {
     const vars: Record<string, unknown> = {};
     const varDec: string[] = [];
 
