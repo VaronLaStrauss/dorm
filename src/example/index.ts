@@ -49,17 +49,46 @@ const AuditRel = relations(Audit, {
   user: forward(User),
 });
 
+const PsgcType = fromValues(
+  "region",
+  "province",
+  "district",
+  "municipality",
+  "sub-municipality",
+  "city",
+  "city-municipality",
+  "barangay"
+);
+
+const Psgc = createType("Psgc", {
+  code: predicate({ type: PredicateType.STRING }),
+  parent: predicate({ type: PredicateType.NODE }),
+  children: predicate({ type: PredicateType.NODE, asArray: true }),
+  name: predicate({ type: PredicateType.STRING }),
+  placeType: predicate({
+    type: PredicateType.STRING,
+    fromValues: PsgcType,
+  }),
+});
+
+export const PsgcRel = relations(Psgc, {
+  children: reverse(Psgc, "parent"),
+  parent: forward(Psgc),
+});
+
 const db = schema(
   {
     User,
     Audit,
     Employee,
     Branch,
+    Psgc,
   },
   {
     User: UserRel,
     Audit: AuditRel,
     Employee: EmployeRel,
+    Psgc: PsgcRel,
   }
 );
 
@@ -69,7 +98,7 @@ const frag = db.fragment("Audit", {
       password: passwordOpts("$pass1"),
       activeType: true,
       uid: true,
-      type: true,
+      dtype: true,
       branch: {
         with: {
           name: true,
@@ -100,7 +129,7 @@ const frag = db.fragment("Audit", {
 });
 
 // console.log(frag.execute().user.branch.);
-// console.log(frag.fragment);
+console.log(frag.fragment);
 
 const mut = db.mutate("User", {
   activeType: "active",
@@ -142,3 +171,27 @@ const q = db.query({
 
 // const y = filterValueReqSchema([dateFilter]);
 // type Y = Static<typeof y>;
+
+const PsgcRootFrag = db.fragment(
+  "Psgc",
+  {
+    code: true,
+    name: true,
+    placeType: true,
+    uid: true,
+    parent: {},
+  },
+  true
+);
+
+console.log(
+  db
+    .query({
+      x: {
+        fragment: PsgcRootFrag,
+        recurse: true,
+        mainFunc: { op: "type", value: "Psgc" },
+      },
+    })
+    .build("x").query
+);

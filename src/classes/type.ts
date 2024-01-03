@@ -1,32 +1,17 @@
+import { PredicateRecord, PredOpts, Forward, Reverse, predicate } from ".";
 import {
-  Forward,
+  PredicateType,
+  spacing,
+  forwardReverseType,
+  compileDirectives,
+} from "..";
+import {
+  ExtendedTypes,
   FragmentOpts,
   RelationsRecord,
-  Reverse,
   WithFragment,
-} from ".";
-import { PredicateType, spacing } from "../utils";
-import { UnionToIntersection } from "../utils/types";
-import { compileDirectives, forwardReverseType } from "./compiler";
-import { PredOpts, PredicateRecord, predicate } from "./predicate";
-
-export type ExtendedTypes = Array<Type>;
-
-export type ExtPredicateUnion<ET extends ExtendedType> = ET["predicateRecord"] &
-  UnionToIntersection<ReturnType<ET["extendedTypes"][number]["extendedPreds"]>>;
-
-export type ExtendedPredicates<T extends Type | ExtendedType> =
-  T extends ExtendedType
-    ? {
-        [key in keyof ExtPredicateUnion<T>]: ExtPredicateUnion<T>[key] & {
-          typeName: string;
-        };
-      }
-    : {
-        [key in keyof T["predicateRecord"]]: T["predicateRecord"][key] & {
-          typeName: string;
-        };
-      };
+  ExtendedPredicates,
+} from "../types";
 
 export class Type<
   Name extends string = string,
@@ -51,7 +36,8 @@ export class Type<
     relations: RelationsRecord<TR>,
     usedVars: Map<string, unknown>,
     hasOrTypeValues: Set<string>,
-    space = 1
+    space = 1,
+    asRecurse?: boolean
   ) {
     const preds = this.extendedPreds();
     const inners: string[] = [];
@@ -91,7 +77,8 @@ export class Type<
         relations,
         usedVars,
         hasOrTypeValues,
-        space
+        space,
+        asRecurse
       );
       inners.push(inner);
     }
@@ -124,7 +111,8 @@ export class Type<
     relations: RelationsRecord<TR>,
     usedVars: Map<string, unknown>,
     hasOrTypeValues: Set<string>,
-    space = 1
+    space = 1,
+    asRecurse?: boolean
   ): string {
     const _space = spacing(space);
     const relation = relations[typeName]!.relations[predName as never] as
@@ -134,17 +122,12 @@ export class Type<
     if (typeof withFrag === "boolean") {
       const builtPreds = this.buildAllLeafPreds(usedVars, space + 1);
       const relationStr = forwardReverseType(typeName, predName, relation);
+      if (asRecurse) return `${_space}${relationStr}\n${builtPreds}`;
+
       return `${_space}${relationStr} {\n${builtPreds}\n${_space}}`;
     }
 
     const { with: w, opts, cascade, page, filter, order } = withFrag;
-    const builtPreds = this.buildPreds(
-      w,
-      relations,
-      usedVars,
-      hasOrTypeValues,
-      space + 1
-    );
 
     const relationStr = forwardReverseType(
       typeName,
@@ -158,6 +141,20 @@ export class Type<
       usedVars,
       hasOrTypeValues
     );
+
+    if (!w) return `${_space}${relationStr} ${directives} `;
+
+    const builtPreds = this.buildPreds(
+      w,
+      relations,
+      usedVars,
+      hasOrTypeValues,
+      space + 1,
+      asRecurse
+    );
+
+    if (asRecurse)
+      return `${_space}${relationStr} ${directives}\n${builtPreds}`;
 
     return `${_space}${relationStr} ${directives} {\n${builtPreds}\n${_space}}`;
   }
@@ -262,33 +259,8 @@ export function createType<TypeName extends string, PR extends PredicateRecord>(
   return new Type(typeName, {
     ...preds,
     uid: predicate({ type: PredicateType.UID }),
-    type: predicate({ type: PredicateType.TYPE }),
+    dtype: predicate({ type: PredicateType.TYPE }),
   });
 }
 
 export type TypeRecord = Record<string, Type | ExtendedType>;
-
-// ! Working
-// type FigureOut<t extends Type<string, PredicateRecord>> = t['name'] extends string ? 'yes' : false;
-// const t = new Type('waw', {});
-// const _t: FigureOut<typeof t> = ''
-// type FigureOut<t extends Type<string, PredicateRecord>> = {
-//   [key in keyof t['pr']]: t['pr'][key]['opts']
-// };
-// const t = createType('waw', {
-//   x: predicate({type: PredicateType.STRING, asArray: true})
-// });
-// const _t: FigureOut<typeof t> = {x: {}}
-
-// ! Working for getting preds from extended types
-// type FigureOut2<t extends ExtendedType> = t['extendedTypes'][number]['predicateRecord'] & t['predicateRecord'];
-// const x = createType("waw", {
-//   x: predicate({ type: PredicateType.STRING, asArray: true }),
-// });
-// const x2 = createType("waw", {
-//   x2: predicate({ type: PredicateType.STRING, asArray: true }),
-// });
-// const y = createType("another", {
-//   y: predicate({ type: PredicateType.STRING, asArray: true, nullable: true }),
-// }).extends(x,x2);
-// const z: FigureOut2<typeof y> = {};

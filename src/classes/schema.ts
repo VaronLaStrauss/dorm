@@ -1,10 +1,13 @@
 import { DgraphClient, Operation } from "dgraph-js";
+import { TypeRecord, Fragment, DormQuery, Forward, Reverse } from ".";
 import { PredicateType } from "..";
-import { Fragment, FragmentOpts } from "./fragment";
-import { DormMutation, MutClass } from "./mutation";
-import { DormQuery, QueryOpts } from "./query";
-import { Forward, RelationsRecord, Reverse } from "./relations";
-import { TypeRecord } from "./type";
+import {
+  RelationsRecord,
+  FragmentOpts,
+  QueryOpts,
+  DormMutation,
+} from "../types";
+import { MutClass } from "./mutation";
 
 export class Schema<
   TR extends TypeRecord = TypeRecord,
@@ -49,6 +52,7 @@ export class Schema<
   fragment<key extends keyof TR, FO extends FragmentOpts<TR, key, RR>>(
     typeName: key,
     fragmentOpts: FO,
+    asRecurse?: true,
     usedVars = new Map<string, unknown>()
   ): Fragment<TR, RR, key, FO> {
     const type = this.types[typeName];
@@ -57,7 +61,8 @@ export class Schema<
       this.relations,
       usedVars,
       this.hasOrTypeValues,
-      2
+      2,
+      asRecurse
     );
 
     return new Fragment<TR, RR, key, FO>(this, fragment, usedVars, typeName);

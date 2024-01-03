@@ -1,37 +1,15 @@
 import { DgraphClient, Txn } from "dgraph-js";
-import { FilterValue, Query } from "../query-schema";
-import { Fragment, FragmentOpts } from "./fragment";
-import { RelationsRecord } from "./relations";
-import { TypeRecord } from "./type";
-import { compileDirectives, compileMainFunc } from "./compiler";
-import { Schema } from ".";
-import { parseDqlType, spacing } from "..";
-
-export type QueryOpts<
-  TR extends TypeRecord,
-  RR extends RelationsRecord<TR>
-> = Record<
-  string,
-  {
-    fragment?: Fragment<TR, RR, keyof TR, FragmentOpts<TR, keyof TR, RR>>;
-    mainFunc: FilterValue;
-  } & Query
->;
-
-export type QueryReturn<
-  TR extends TypeRecord,
-  RR extends RelationsRecord<TR>,
-  QO extends QueryOpts<TR, RR>
-> = {
-  [key in keyof QO]: QO[key]["fragment"] extends Fragment<
-    TR,
-    RR,
-    keyof TR,
-    FragmentOpts<TR, keyof TR, RR>
-  >
-    ? ReturnType<QO[key]["fragment"]["execute"]>[]
-    : never;
-};
+import { TypeRecord, Schema } from ".";
+import {
+  RelationsRecord,
+  QueryOpts,
+  spacing,
+  compileDirectives,
+  compileMainFunc,
+  compileRecurse,
+  parseDqlType,
+  QueryReturn,
+} from "..";
 
 export class DormQuery<
   TR extends TypeRecord,
@@ -43,7 +21,7 @@ export class DormQuery<
   build<key extends keyof QO & string>(key: key, space = 1) {
     const _space = spacing(space);
     const q = this.queries[key];
-    const { filter, cascade, fragment } = q;
+    const { filter, cascade, fragment, recurse } = q;
     const usedVars = new Map<string, unknown>(q.fragment?.usedVars);
 
     const directives = compileDirectives(
@@ -54,6 +32,7 @@ export class DormQuery<
     const mainFunc = compileMainFunc(q, usedVars, this.schema.hasOrTypeValues);
 
     let query = `${_space}${key}(${mainFunc}) ${directives}`;
+    if (recurse) query += `${compileRecurse(recurse)} `;
     if (fragment) query += `{\n${fragment.fragment}\n${_space}}`;
     return { query, usedVars };
   }

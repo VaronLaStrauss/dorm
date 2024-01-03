@@ -1,12 +1,5 @@
-import { PredicateType } from "../utils/pred-type";
-import { _PicklePredicates } from "../utils/types";
-import { ExtendedPredicates, ExtendedType, Type, TypeRecord } from "./type";
-
-type PickleReverse<T extends Type> = {
-  [key in keyof T["predicateRecord"]]: T["predicateRecord"][key]["options"]["type"] extends PredicateType.NODE
-    ? key
-    : never;
-}[keyof T["predicateRecord"]];
+import { Type, ExtendedType } from ".";
+import { PickleReverse, Relation } from "../types";
 
 export class Forward<T extends Type = Type> {
   constructor(public type: T) {}
@@ -30,13 +23,6 @@ export function reverse<T extends Type, field extends PickleReverse<T>>(
   return new Reverse(type, field);
 }
 
-export type Relation<T extends Type | ExtendedType> = {
-  [key in keyof Pick<
-    ExtendedPredicates<T>,
-    _PicklePredicates<ExtendedPredicates<T>>
-  >]: ReturnType<typeof forward> | ReturnType<typeof reverse>;
-};
-
 export class Relations<
   T extends Type | ExtendedType = Type,
   R extends Relation<T> = Relation<T>
@@ -50,10 +36,6 @@ export function relations<T extends Type | ExtendedType, R extends Relation<T>>(
 ) {
   return new Relations(type, relations);
 }
-
-export type RelationsRecord<TR extends TypeRecord> = {
-  [key in keyof TR]?: Relations<TR[key]>;
-};
 
 // ! Working
 // const x = createType("waw", {

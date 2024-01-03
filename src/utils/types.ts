@@ -22,3 +22,7 @@ export type Nullable<
   Opts extends PredicateInitOpts,
   V
 > = Opts["nullable"] extends true ? V | null | undefined : V;
+
+export type Composite<V> = {
+  [key in keyof V]: V[key];
+};

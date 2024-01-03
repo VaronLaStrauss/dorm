@@ -1,6 +1,7 @@
-import { Forward, QueryOpts, RelationsRecord, Reverse, TypeRecord } from ".";
 import { Query, defaultListLimit } from "../query-schema";
-import { parseFilter } from "../utils";
+import { parseFilter } from ".";
+import { RecurseOpts } from "../types/recurse.types";
+import { Forward, Reverse, TypeRecord, RelationsRecord, QueryOpts } from "..";
 
 export type FilterReturn = { node: string; usedVars: Set<string> };
 
@@ -117,4 +118,10 @@ export function compileOrder(
     _orders.push(`order${order.format ?? "asc"}: ${order.field}`);
   }
   return _orders.join(", ");
+}
+
+export function compileRecurse(opts: RecurseOpts) {
+  return typeof opts === "boolean"
+    ? `@recurse`
+    : `@recurse(loop: ${opts.loop}, depth: ${opts.depth})`;
 }

@@ -1,47 +1,5 @@
-import { FragmentPreds, Schema } from ".";
-import { Query } from "../query-schema";
-import { PredicateType } from "../utils/pred-type";
-import { PasswordOpts, PredOpts } from "./predicate";
-import { Relations, RelationsRecord } from "./relations";
-import { ExtendedPredicates, TypeRecord } from "./type";
-
-export type WithFragment<
-  TR extends TypeRecord,
-  ThisType extends keyof TR,
-  RR extends RelationsRecord<TR>
-> = {
-  with: FragmentOpts<TR, ThisType, RR>;
-  opts?: PredOpts;
-} & Query;
-
-export type FragmentOpts<
-  TR extends TypeRecord,
-  TypeName extends keyof TR,
-  RR extends RelationsRecord<TR>,
-  EP extends ExtendedPredicates<TR[TypeName]> = ExtendedPredicates<TR[TypeName]>
-> = {
-  [key in keyof EP]?: {
-    [k in key]: EP[key]["options"]["type"] extends PredicateType.NODE
-      ? TypeName extends keyof RR
-        ? RR[TypeName] extends Relations<TR[TypeName]>
-          ? key extends keyof RR[TypeName]["relations"]
-            ? RR[TypeName]["relations"][key]["type"]["name"] extends keyof TR
-              ?
-                  | WithFragment<
-                      TR,
-                      RR[TypeName]["relations"][key]["type"]["name"],
-                      RR
-                    >
-                  | true
-              : never
-            : never
-          : never
-        : never
-      : EP[key]["options"]["type"] extends PredicateType.PASSWORD
-      ? PasswordOpts
-      : true | PredOpts;
-  };
-}[keyof EP];
+import { TypeRecord, Schema } from ".";
+import { RelationsRecord, FragmentOpts, FragmentPreds } from "..";
 
 export class Fragment<
   TR extends TypeRecord,
@@ -81,11 +39,3 @@ export class Fragment<
     throw new Error("Not callable - used only for type");
   }
 }
-
-export type InferReturn<
-  F extends Fragment<TR, RR, key, FO>,
-  TR extends TypeRecord = TypeRecord,
-  RR extends RelationsRecord<TR> = RelationsRecord<TR>,
-  key extends keyof TR = keyof TR,
-  FO extends FragmentOpts<TR, key, RR> = FragmentOpts<TR, key, RR>
-> = ReturnType<F["execute"]>;
