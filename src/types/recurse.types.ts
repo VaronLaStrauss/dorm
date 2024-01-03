@@ -1,1 +1,1 @@
-export type RecurseOpts = true | { loop: true; depth: number };
+export type RecurseOpts = true | { loop: boolean; depth: number };
