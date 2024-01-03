@@ -1,33 +1,32 @@
 import {
-  GoGeomTypes,
-  PredicateInitOpts,
-  StringPredicate,
   BoolPredicate,
   DateTimePredicate,
-  FloatPredicate,
-  GeoPredicate,
-  IntPredicate,
-  PasswordPredicate,
   ExtendedPredicates,
-  RelationsRecord,
+  FloatPredicate,
   FragmentOpts,
+  GeoPredicate,
+  GoGeomTypes,
+  IntPredicate,
   NodePredicate,
+  PasswordPredicate,
+  PredicateInitOpts,
+  RelationsRecord,
+  StringPredicate,
   WithFragment,
 } from ".";
 import {
-  PredicateType,
-  Type,
-  Nullable,
-  AsArray,
   Composite,
+  Forward,
+  Fragment,
+  NullableType,
+  PredicateType,
+  Relations,
+  Reverse,
+  Type,
   TypeRecord,
   UnionToIntersection,
-  Relations,
-  Forward,
-  Reverse,
-  predOpts,
   passwordOpts,
-  Fragment,
+  predOpts,
 } from "..";
 
 export type GeoType<GeoKey extends (typeof GoGeomTypes)[number]> = {
@@ -73,9 +72,9 @@ export type PickleAllLeaf<T extends Type, EP extends ExtendedPredicates<T>> = {
     : key;
 }[keyof EP];
 
-export type InferPredicateOpts<Opts extends PredicateInitOpts> = Nullable<
+export type InferPredicateOpts<Opts extends PredicateInitOpts> = NullableType<
   Opts,
-  AsArray<Opts, InferLeafType<Opts>>
+  InferLeafType<Opts>
 >;
 
 export type PickLeaf<
@@ -103,7 +102,7 @@ export type FragmentPreds<
               ? key extends keyof RR[TypeName]["relations"]
                 ? RR[TypeName]["relations"][key] extends Forward | Reverse
                   ? {
-                      [k in key]: AsArray<
+                      [k in key]: NullableType<
                         EP[key]["options"],
                         PickLeaf<RR[TypeName]["relations"][key]["type"]>
                       >;
@@ -127,17 +126,16 @@ export type FragmentPreds<
                   RR
                 >
                 ? FO[key]["opts"] extends ReturnType<typeof predOpts>
-                  ? FO[key]["opts"]["alias"] extends string
-                    ? {
-                        [k in FO[key]["opts"]["alias"]]: InnerFragmentPreds<
-                          TR,
-                          RR[TypeName]["relations"][key]["type"]["name"],
-                          RR,
-                          FO[key]["with"],
-                          EP[key]["options"]
-                        >;
-                      }
-                    : never
+                  ? {
+                      [k in FO[key]["opts"]["alias"] &
+                        string]: InnerFragmentPreds<
+                        TR,
+                        RR[TypeName]["relations"][key]["type"]["name"],
+                        RR,
+                        FO[key]["with"],
+                        EP[key]["options"]
+                      >;
+                    }
                   : {
                       [k in key]: InnerFragmentPreds<
                         TR,
@@ -162,7 +160,7 @@ export type InnerFragmentPreds<
   RR extends RelationsRecord<TR>,
   FO extends FragmentOpts<TR, TypeName, RR>,
   Opts extends PredicateInitOpts
-> = Nullable<Opts, AsArray<Opts, FragmentPreds<TR, TypeName, RR, FO>>>;
+> = NullableType<Opts, FragmentPreds<TR, TypeName, RR, FO>>;
 
 export type InferReturn<
   F extends Fragment<TR, RR, key, FO>,
