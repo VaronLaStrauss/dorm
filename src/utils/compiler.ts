@@ -15,8 +15,8 @@ export function forwardReverseType(
   const forward = relation instanceof Forward;
   let type = `${alias ?? predKey}: `;
   if (forward) type += `${typeName}.${predKey}`;
-  else type += `<~${relation.type.name}.${relation.field}>`;
-  if (asVar) type += ` as ${asVar}`;
+  else type += `~${relation.type.name}.${relation.field}`;
+  if (asVar) type = `${asVar} as ${type}`;
   return type;
 }
 

@@ -16,9 +16,8 @@ export class Predicate<PIO extends PredicateInitOpts> {
     }
 
     const { alias, asVar } = opts;
-
-    const _asVar = asVar ? ` as ${asVar}` : "";
-    return `${_space}${alias ?? predName}: ${this.options.type}${_asVar}`;
+    const _asVar = asVar ? `${asVar} as` : "";
+    return `${_space}${alias ?? predName}: ${_asVar} ${this.options.type}`;
   }
 
   build(
@@ -38,18 +37,18 @@ export class Predicate<PIO extends PredicateInitOpts> {
         throw new Error("Password vars must start with $pass");
       const checkPwd = `checkpwd(${this.typeName}.${predName}, ${pwdVar})`;
       usedVars.set(pwdVar, undefined);
-      const _asVar = asVar ? ` as ${asVar}` : "";
-      return `${_space}${alias ?? predName}: ${checkPwd}${_asVar}`;
+      const _asVar = asVar ? `${asVar} as` : "";
+      return `${_space}${alias ?? predName}: ${_asVar} ${checkPwd}`;
     }
 
     if (typeof opts === "boolean")
       return `${_space}${predName}: ${this.typeName}.${predName}`;
 
     const { alias, asVar } = opts;
-    const _asVar = asVar ? ` as ${asVar}` : "";
-    return `${_space}${alias ?? predName}: ${
+    const _asVar = asVar ? `${asVar} as` : "";
+    return `${_space}${alias ?? predName}: ${asVar} ${
       this.typeName
-    }.${predName}${_asVar}`;
+    }.${predName}`;
   }
 }
 
