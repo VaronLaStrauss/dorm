@@ -12,17 +12,19 @@ export class Fragment<
     private schema: Schema<TR, RR>,
     public fragment: string,
     public usedVars: Map<string, unknown>,
-    private key: key
+    private key: key,
+    public allowedValues: Set<string>
   ) {}
 
   append<F extends FragmentOpts<TR, key, RR>>(opts: F) {
     const relations = this.schema.relations;
     const type = this.schema.types[this.key];
+    const allowedValues = new Set([...this.allowedValues]);
     const fragment = type.buildPreds(
       opts as never,
       relations,
       this.usedVars,
-      this.schema.hasOrTypeValues,
+      allowedValues,
       2
     );
     const f = this.fragment + `\n${fragment}`;
@@ -32,7 +34,7 @@ export class Fragment<
       key,
       FO,
       FP & FragmentPreds<TR, key, RR, typeof opts>
-    >(this.schema, f, this.usedVars, this.key);
+    >(this.schema, f, this.usedVars, this.key, allowedValues);
   }
 
   execute(): FP {

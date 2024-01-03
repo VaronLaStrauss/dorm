@@ -1,6 +1,11 @@
 import { none } from "..";
 import { PredicateType } from "../utils/pred-type";
-import { fromValues, passwordOpts, predicate } from "../classes/predicate";
+import {
+  fromValues,
+  passwordOpts,
+  predOpts,
+  predicate,
+} from "../classes/predicate";
 import { forward, relations, reverse } from "../classes/relations";
 import { schema } from "../classes/schema";
 import { createType } from "../classes/type";
@@ -96,7 +101,7 @@ const frag = db.fragment("Audit", {
   user: {
     with: {
       password: passwordOpts("$pass1"),
-      activeType: true,
+      activeType: predOpts(undefined, "waw"),
       uid: true,
       dtype: true,
       branch: {
@@ -155,12 +160,15 @@ const mut = db.mutate("User", {
 
 console.log(JSON.stringify(mut));
 
+console.log(170, frag.append({ date: true }).allowedValues);
 const q = db.query({
   x: {
     fragment: frag.append({ date: true }),
-    mainFunc: { op: "type", value: "Audit" },
+    mainFunc: { op: "uid", value: "waw" },
   },
 });
+console.log(q.build({}).query);
+
 // console.log(await q.execute(undefined as never, { $pass1: "waw" }));
 
 // console.log(db.build());
@@ -172,26 +180,26 @@ const q = db.query({
 // const y = filterValueReqSchema([dateFilter]);
 // type Y = Static<typeof y>;
 
-const PsgcRootFrag = db.fragment(
-  "Psgc",
-  {
-    code: true,
-    name: true,
-    placeType: true,
-    uid: true,
-    parent: {},
-  },
-  true
-);
+// const PsgcRootFrag = db.fragment(
+//   "Psgc",
+//   {
+//     code: true,
+//     name: true,
+//     placeType: true,
+//     uid: true,
+//     parent: {},
+//   },
+//   true
+// );
 
-console.log(
-  db
-    .query({
-      x: {
-        fragment: PsgcRootFrag,
-        recurse: true,
-        mainFunc: { op: "type", value: "Psgc" },
-      },
-    })
-    .build("x").query
-);
+// console.log(
+//   db
+//     .query({
+//       x: {
+//         fragment: PsgcRootFrag,
+//         recurse: true,
+//         mainFunc: { op: "type", value: "Psgc" },
+//       },
+//     })
+//     .build("x").query
+// );

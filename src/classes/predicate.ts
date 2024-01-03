@@ -1,4 +1,4 @@
-import { PredicateInitOpts, spacing, PredicateType } from "..";
+import { PredicateInitOpts, spacing, PredicateType, compileAsVar } from "..";
 
 export function fromValues<T extends Readonly<string>>(...vals: T[]) {
   return vals;
@@ -9,21 +9,27 @@ export class Predicate<PIO extends PredicateInitOpts> {
 
   constructor(public options: PIO) {}
 
-  buildStatic(predName: string, opts: PredOpts | boolean, space: number) {
+  buildStatic(
+    predName: string,
+    opts: PredOpts | boolean,
+    allowedValues: Set<string>,
+    space: number
+  ) {
     const _space = spacing(space);
     if (typeof opts === "boolean") {
       return `${_space}${predName}: ${this.options.type}`;
     }
 
     const { alias, asVar } = opts;
-    const _asVar = asVar ? `${asVar} as` : "";
-    return `${_space}${alias ?? predName}: ${_asVar} ${this.options.type}`;
+    const _asVar = compileAsVar(asVar, allowedValues);
+    return `${_space}${alias ?? predName}: ${_asVar}${this.options.type}`;
   }
 
   build(
     predName: string,
     opts: PredOpts | PasswordOpts | boolean,
     usedVars: Map<string, unknown>,
+    allowedValues: Set<string>,
     space: number
   ) {
     const _space = spacing(space);
@@ -37,16 +43,16 @@ export class Predicate<PIO extends PredicateInitOpts> {
         throw new Error("Password vars must start with $pass");
       const checkPwd = `checkpwd(${this.typeName}.${predName}, ${pwdVar})`;
       usedVars.set(pwdVar, undefined);
-      const _asVar = asVar ? `${asVar} as` : "";
-      return `${_space}${alias ?? predName}: ${_asVar} ${checkPwd}`;
+      const _asVar = compileAsVar(asVar, allowedValues);
+      return `${_space}${alias ?? predName}:${_asVar ?? " "}${checkPwd}`;
     }
 
     if (typeof opts === "boolean")
       return `${_space}${predName}: ${this.typeName}.${predName}`;
 
     const { alias, asVar } = opts;
-    const _asVar = asVar ? `${asVar} as` : "";
-    return `${_space}${alias ?? predName}: ${asVar} ${
+    const _asVar = compileAsVar(asVar, allowedValues);
+    return `${_space}${alias ?? predName}: ${_asVar}${
       this.typeName
     }.${predName}`;
   }

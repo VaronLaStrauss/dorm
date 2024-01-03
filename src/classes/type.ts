@@ -35,7 +35,7 @@ export class Type<
     opts: FragmentOpts<TR, key, RelationsRecord<TR>>,
     relations: RelationsRecord<TR>,
     usedVars: Map<string, unknown>,
-    hasOrTypeValues: Set<string>,
+    allowedValues: Set<string>,
     space = 1,
     asRecurse?: boolean
   ) {
@@ -54,6 +54,7 @@ export class Type<
         const inner = pred.buildStatic(
           predKey,
           predOpt as PredOpts | boolean,
+          allowedValues,
           space
         );
         inners.push(inner);
@@ -61,7 +62,13 @@ export class Type<
       }
 
       if (pred.options.type !== PredicateType.NODE) {
-        const inner = pred.build(predKey, predOpt as PredOpts, usedVars, space);
+        const inner = pred.build(
+          predKey,
+          predOpt as PredOpts,
+          usedVars,
+          allowedValues,
+          space
+        );
         inners.push(inner);
         continue;
       }
@@ -76,7 +83,7 @@ export class Type<
         predOpt as WithFragment<never, never, never>,
         relations,
         usedVars,
-        hasOrTypeValues,
+        allowedValues,
         space,
         asRecurse
       );
@@ -85,7 +92,11 @@ export class Type<
     return inners.join("\n");
   }
 
-  buildAllLeafPreds(usedVars: Map<string, unknown>, space = 1) {
+  buildAllLeafPreds(
+    usedVars: Map<string, unknown>,
+    allowedValues: Set<string>,
+    space = 1
+  ) {
     const preds = this.extendedPreds();
     const inners: string[] = [];
     for (const predKey in preds) {
@@ -96,8 +107,8 @@ export class Type<
       if (type === PredicateType.NODE) continue;
       const inner =
         type === PredicateType.UID || type === PredicateType.TYPE
-          ? pred.buildStatic(predKey, true, space)
-          : pred.build(predKey, true, usedVars, space);
+          ? pred.buildStatic(predKey, true, allowedValues, space)
+          : pred.build(predKey, true, usedVars, allowedValues, space);
       inners.push(inner);
     }
 
@@ -110,7 +121,7 @@ export class Type<
     withFrag: WithFragment<TR, typeof this.name, RelationsRecord<TR>> | boolean,
     relations: RelationsRecord<TR>,
     usedVars: Map<string, unknown>,
-    hasOrTypeValues: Set<string>,
+    allowedValues: Set<string>,
     space = 1,
     asRecurse?: boolean
   ): string {
@@ -120,8 +131,17 @@ export class Type<
       | Reverse;
 
     if (typeof withFrag === "boolean") {
-      const builtPreds = this.buildAllLeafPreds(usedVars, space + 1);
-      const relationStr = forwardReverseType(typeName, predName, relation);
+      const builtPreds = this.buildAllLeafPreds(
+        usedVars,
+        allowedValues,
+        space + 1
+      );
+      const relationStr = forwardReverseType(
+        typeName,
+        predName,
+        relation,
+        allowedValues
+      );
       if (asRecurse) return `${_space}${relationStr}\n${builtPreds}`;
 
       return `${_space}${relationStr} {\n${builtPreds}\n${_space}}`;
@@ -133,13 +153,14 @@ export class Type<
       typeName,
       predName,
       relation,
+      allowedValues,
       opts?.alias,
       opts?.asVar
     );
     const directives = compileDirectives(
       { cascade, page, filter, order },
       usedVars,
-      hasOrTypeValues
+      allowedValues
     );
 
     if (!w) return `${_space}${relationStr} ${directives} `;
@@ -148,7 +169,7 @@ export class Type<
       w,
       relations,
       usedVars,
-      hasOrTypeValues,
+      allowedValues,
       space + 1,
       asRecurse
     );

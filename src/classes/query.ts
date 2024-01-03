@@ -16,9 +16,19 @@ export class DormQuery<
   RR extends RelationsRecord<TR>,
   QO extends QueryOpts<TR, RR>
 > {
-  constructor(private queries: QO, private schema: Schema<TR, RR>) {}
+  allowedValues = new Set<string>();
 
-  build<key extends keyof QO & string>(key: key, space = 1) {
+  constructor(private queries: QO) {
+    for (const key in queries) {
+      const { fragment } = queries[key];
+      if (!fragment) continue;
+      for (const allowedValue of fragment.allowedValues) {
+        this.allowedValues.add(allowedValue);
+      }
+    }
+  }
+
+  buildOneQuery<key extends keyof QO & string>(key: key, space = 1) {
     const _space = spacing(space);
     const q = this.queries[key];
     const { filter, cascade, fragment, recurse } = q;
@@ -27,9 +37,10 @@ export class DormQuery<
     const directives = compileDirectives(
       { filter, cascade },
       usedVars,
-      this.schema.hasOrTypeValues
+      this.allowedValues
     );
-    const mainFunc = compileMainFunc(q, usedVars, this.schema.hasOrTypeValues);
+
+    const mainFunc = compileMainFunc(q, usedVars, this.allowedValues);
 
     let query = `${_space}${key}(${mainFunc}) ${directives}`;
     if (recurse) query += `${compileRecurse(recurse)} `;
@@ -37,16 +48,13 @@ export class DormQuery<
     return { query, usedVars };
   }
 
-  async execute(
-    dbOrTxn: DgraphClient | Txn,
-    outsourcedVars: Record<string, unknown> = {}
-  ) {
+  build(outsourcedVars: Record<string, unknown>) {
     const vars: Record<string, unknown> = {};
     const varDec: string[] = [];
 
     const queries: string[] = [];
     for (const queryKey in this.queries) {
-      const { query, usedVars } = this.build(queryKey);
+      const { query, usedVars } = this.buildOneQuery(queryKey);
       queries.push(query);
       for (let [key, val] of usedVars) {
         if (key in outsourcedVars) val = outsourcedVars[key];
@@ -58,6 +66,14 @@ export class DormQuery<
     let query = `query q`;
     if (varDec.length) query += `(${varDec.join(", ")})`;
     query += `{\n${queries.join("\n")}\n}`;
+    return { query, varDec, vars };
+  }
+
+  async execute(
+    dbOrTxn: DgraphClient | Txn,
+    outsourcedVars: Record<string, unknown> = {}
+  ) {
+    const { query, varDec, vars } = this.build(outsourcedVars);
 
     const txn =
       dbOrTxn instanceof DgraphClient

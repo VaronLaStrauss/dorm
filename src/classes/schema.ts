@@ -13,7 +13,7 @@ export class Schema<
   TR extends TypeRecord = TypeRecord,
   RR extends RelationsRecord<TR> = RelationsRecord<TR>
 > {
-  hasOrTypeValues = new Set<string>();
+  allowedValues = new Set<string>();
 
   constructor(public types: TR, public relations: RR) {
     this.init();
@@ -22,11 +22,11 @@ export class Schema<
   init() {
     for (const typeName in this.types) {
       const type = this.types[typeName];
-      this.hasOrTypeValues.add(typeName);
+      this.allowedValues.add(typeName);
       const preds = type.extendedPreds();
       for (const predName in preds) {
         const pred = preds[predName];
-        this.hasOrTypeValues.add(`${pred.typeName}.${predName}`);
+        this.allowedValues.add(`${pred.typeName}.${predName}`);
       }
     }
   }
@@ -56,20 +56,27 @@ export class Schema<
     usedVars = new Map<string, unknown>()
   ): Fragment<TR, RR, key, FO> {
     const type = this.types[typeName];
+    const allowedValues = new Set(this.allowedValues);
     const fragment = type.buildPreds<TR, key>(
       fragmentOpts as never,
       this.relations,
       usedVars,
-      this.hasOrTypeValues,
+      allowedValues,
       2,
       asRecurse
     );
 
-    return new Fragment<TR, RR, key, FO>(this, fragment, usedVars, typeName);
+    return new Fragment<TR, RR, key, FO>(
+      this,
+      fragment,
+      usedVars,
+      typeName,
+      allowedValues
+    );
   }
 
   query<QO extends QueryOpts<TR, RR>>(queries: QO) {
-    return new DormQuery<TR, RR, QO>(queries, this);
+    return new DormQuery<TR, RR, QO>(queries);
   }
 
   private _mutate<key extends keyof TR, Mut extends DormMutation<TR, RR, key>>(
