@@ -1,4 +1,3 @@
-import { t } from "elysia";
 import { ExtendedPredicates, Type } from "../classes";
 import {
   DateTimeIndex,
@@ -55,8 +54,14 @@ export type AllowedFilter<
 export function allowedFilter<
   T extends Type,
   AP extends AllowedPreds<T> = AllowedPreds<T>,
-  VN extends string | undefined = undefined
->(type: T, preds: AP, viewName: VN): AllowedFilter<T> & { alias: VN } {
+  VN extends string | undefined = undefined,
+  AV extends unknown[] | undefined = undefined
+>(
+  type: T,
+  preds: AP,
+  viewName: VN,
+  allowedValues: AV = undefined as AV
+): AllowedFilter<T> & { alias: VN; allowedValues: AV } {
   let indexes: Record<string, unknown> = { ...Indexless };
   const predName = preds;
 
@@ -94,5 +99,6 @@ export function allowedFilter<
     field: `${type.name}.${predName}`,
     typeName: type.name,
     ops: indexes as never,
+    allowedValues,
   };
 }

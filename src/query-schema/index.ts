@@ -1,6 +1,8 @@
 import { t, Static } from "elysia";
 import { OneValIndex, TwoValIndex, ZeroValIndex } from "../utils";
 
+export * from "./filter-op";
+
 export const limits = [5, 10, 15, 20, 25] as const;
 export const defaultListLimit = limits[1];
 
