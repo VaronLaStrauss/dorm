@@ -23,6 +23,8 @@ export type Nullable<
   V
 > = Opts["nullable"] extends true ? V | null | undefined : V;
 
+export type NullableType<Opts, V> = Nullable<Opts, AsArray<Opts, V>>;
+
 export type Composite<V> = {
   [key in keyof V]: V[key];
 };

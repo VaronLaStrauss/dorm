@@ -1,25 +1,24 @@
 import {
-  PredicateInitOpts,
-  FloatPredicate,
-  IntPredicate,
-  DateTimePredicate,
-  PasswordPredicate,
-  StringPredicate,
   BoolPredicate,
+  DateTimePredicate,
+  ExtendedPredicates,
+  FloatPredicate,
   GeoPredicate,
   GoGeomTypes,
+  IntPredicate,
+  PasswordPredicate,
+  PredicateInitOpts,
   RelationsRecord,
-  ExtendedPredicates,
   StaticPredicate,
+  StringPredicate,
 } from ".";
 import {
   GeoType,
+  NullableType,
   PredicateType,
-  Nullable,
-  AsArray,
-  TypeRecord,
-  Type,
   Relations,
+  Type,
+  TypeRecord,
 } from "..";
 
 export type InferMutationLeaf<Opts extends PredicateInitOpts> = Opts extends
@@ -40,9 +39,9 @@ export type InferMutationLeaf<Opts extends PredicateInitOpts> = Opts extends
   ? string
   : string[] | string;
 
-export type MutationLeafOpts<Opts extends PredicateInitOpts> = Nullable<
+export type MutationLeafOpts<Opts extends PredicateInitOpts> = NullableType<
   Opts,
-  AsArray<Opts, InferMutationLeaf<Opts>>
+  InferMutationLeaf<Opts>
 >;
 
 export type MutationUidOpts<
@@ -51,7 +50,7 @@ export type MutationUidOpts<
   ThisKey extends keyof TR,
   Opts extends PredicateInitOpts,
   PrevType extends Type | undefined
-> = Nullable<Opts, AsArray<Opts, DormMutation<TR, RR, ThisKey, PrevType>>>;
+> = NullableType<Opts, DormMutation<TR, RR, ThisKey, PrevType>>;
 
 export type PickleNullableFields<
   TR extends TypeRecord,
