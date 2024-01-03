@@ -1,4 +1,5 @@
-import { ExtendedPredicates, Type } from "../classes";
+import { ExtendedPredicates } from "..";
+import { Type } from "../classes";
 import {
   DateTimeIndex,
   DefaultIndex,
