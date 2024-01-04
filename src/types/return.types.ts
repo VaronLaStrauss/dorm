@@ -3,31 +3,32 @@ import {
   DateTimePredicate,
   ExtendedPredicates,
   FloatPredicate,
-  FragmentOpts,
   GeoPredicate,
   GoGeomTypes,
   IntPredicate,
   NodePredicate,
   PasswordPredicate,
   PredicateInitOpts,
-  RelationsRecord,
   StringPredicate,
-  WithFragment,
-} from ".";
+} from "./predicate.types";
+import { RelationsRecord } from "./relation.types";
+import { WithFragment, FragmentOpts } from "./fragment.types";
+import { TypeRecord } from "./type.types";
 import {
   Composite,
-  Forward,
-  Fragment,
   NullableType,
   PredicateType,
+  UnionToIntersection,
+} from "../utils";
+import {
+  Fragment,
+  Forward,
   Relations,
   Reverse,
   Type,
-  TypeRecord,
-  UnionToIntersection,
-  passwordOpts,
   predOpts,
-} from "..";
+  passwordOpts,
+} from "../classes";
 
 export type GeoType<GeoKey extends (typeof GoGeomTypes)[number]> = {
   type: GeoKey;
@@ -55,7 +56,7 @@ export type InferLeafType<Opts extends PredicateInitOpts> =
     : Opts extends FloatPredicate
     ? number
     : Opts extends GeoPredicate
-    ? InferGeo<Opts["geoType"]>
+    ? GeoType<Opts["geoType"]>
     : Opts extends IntPredicate
     ? number
     : Opts extends PasswordPredicate

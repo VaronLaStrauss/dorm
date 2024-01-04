@@ -1,4 +1,4 @@
-import { AllIndexes } from ".";
+import { AllIndexes } from "./indexes";
 import { FilterValue } from "../query-schema";
 
 export function parseDqlType(value: unknown) {

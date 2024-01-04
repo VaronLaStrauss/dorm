@@ -1,16 +1,19 @@
-import { PredicateRecord, PredOpts, Forward, Reverse, predicate } from ".";
+import { Forward, Reverse } from "./relations";
+import { PredOpts, predicate } from "./predicate";
 import {
   PredicateType,
   spacing,
   forwardReverseType,
   compileDirectives,
-} from "..";
+} from "../utils";
 import {
   ExtendedTypes,
   FragmentOpts,
   RelationsRecord,
   WithFragment,
   ExtendedPredicates,
+  TypeRecord,
+  PredicateRecord,
 } from "../types";
 
 export class Type<
@@ -261,8 +264,8 @@ export class ExtendedType<
   ET extends ExtendedTypes = ExtendedTypes
 > extends Type<Name, PR> {
   constructor(
-    public name: Name,
-    public predicateRecord: PR,
+    public override name: Name,
+    public override predicateRecord: PR,
     public extendedTypes: ET
   ) {
     super(name, predicateRecord);
@@ -288,5 +291,3 @@ export function createType<TypeName extends string, PR extends PredicateRecord>(
     dtype: predicate({ type: PredicateType.TYPE }),
   });
 }
-
-export type TypeRecord = Record<string, Type | ExtendedType>;

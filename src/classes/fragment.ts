@@ -1,5 +1,10 @@
-import { TypeRecord, Schema } from ".";
-import { RelationsRecord, FragmentOpts, FragmentPreds } from "..";
+import { Schema } from "./schema";
+import {
+  TypeRecord,
+  RelationsRecord,
+  FragmentOpts,
+  FragmentPreds,
+} from "../types";
 
 export class Fragment<
   TR extends TypeRecord,

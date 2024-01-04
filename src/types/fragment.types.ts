@@ -1,13 +1,9 @@
-import { ExtendedPredicates, RelationsRecord } from ".";
-import {
-  Composite,
-  PasswordOpts,
-  PredOpts,
-  PredicateType,
-  Query,
-  Relations,
-  TypeRecord,
-} from "..";
+import { ExtendedPredicates } from "./predicate.types";
+import { RelationsRecord } from "./relation.types";
+import { TypeRecord } from "./type.types";
+import { PasswordOpts, PredOpts, Relations } from "../classes";
+import { PredicateType } from "../utils";
+import { Query } from "../query-schema";
 
 export type WithFragment<
   TR extends TypeRecord,

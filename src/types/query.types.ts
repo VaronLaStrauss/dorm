@@ -1,5 +1,9 @@
-import { RelationsRecord, FragmentOpts, RecurseOpts } from ".";
-import { TypeRecord, Fragment, FilterValue, Query } from "..";
+import { RelationsRecord } from "./relation.types";
+import { FilterValue, Query } from "../query-schema";
+import { TypeRecord } from "./type.types";
+import { Fragment } from "../classes";
+import { FragmentOpts } from "./fragment.types";
+import { RecurseOpts } from "./recurse.types";
 
 export type QueryOpts<
   TR extends TypeRecord,

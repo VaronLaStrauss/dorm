@@ -1,4 +1,4 @@
-import { PredicateInitOpts, PredicateRecord } from "../classes/predicate";
+import { PredicateInitOpts, PredicateRecord } from "../types";
 import { PredicateType } from "./pred-type";
 
 export type UnionToIntersection<U> = (
@@ -23,7 +23,10 @@ export type Nullable<
   V
 > = Opts["nullable"] extends true ? V | null | undefined : V;
 
-export type NullableType<Opts, V> = Nullable<Opts, AsArray<Opts, V>>;
+export type NullableType<Opts extends PredicateInitOpts, V> = Nullable<
+  Opts,
+  AsArray<Opts, V>
+>;
 
 export type Composite<V> = {
   [key in keyof V]: V[key];

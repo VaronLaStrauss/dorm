@@ -1,15 +1,13 @@
 import { DgraphClient, Txn } from "dgraph-js";
-import { TypeRecord, Schema } from ".";
+import { Schema } from "./schema";
+import { RelationsRecord, QueryOpts, TypeRecord, QueryReturn } from "../types";
 import {
-  RelationsRecord,
-  QueryOpts,
   spacing,
   compileDirectives,
   compileMainFunc,
   compileRecurse,
   parseDqlType,
-  QueryReturn,
-} from "..";
+} from "../utils";
 
 export class DormQuery<
   TR extends TypeRecord,

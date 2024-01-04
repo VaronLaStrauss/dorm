@@ -1,4 +1,4 @@
-import { Type, ExtendedType } from ".";
+import { Type, ExtendedType } from "./type";
 import { PickleReverse, Relation } from "../types";
 
 export class Forward<T extends Type = Type> {

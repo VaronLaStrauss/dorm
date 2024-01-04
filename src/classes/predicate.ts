@@ -1,4 +1,5 @@
-import { PredicateInitOpts, spacing, PredicateType, compileAsVar } from "..";
+import { PredicateInitOpts } from "../types";
+import { spacing, PredicateType, compileAsVar } from "../utils";
 
 export function fromValues<T extends Readonly<string>>(...vals: T[]) {
   return vals;
@@ -57,8 +58,6 @@ export class Predicate<PIO extends PredicateInitOpts> {
     }.${predName}`;
   }
 }
-
-export type PredicateRecord = Record<string, Predicate<PredicateInitOpts>>;
 
 export function predicate<PredInitOpts extends PredicateInitOpts>(
   options: PredInitOpts

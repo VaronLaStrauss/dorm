@@ -1,7 +1,11 @@
 import { DgraphClient, Operation } from "dgraph-js";
-import { TypeRecord, Fragment, DormQuery, Forward, Reverse, Type } from ".";
-import { PredicateType } from "..";
+import { Type } from "./type";
+import { Forward, Reverse } from "./relations";
+import { PredicateType } from "../utils";
+import { Fragment } from "./fragment";
+import { DormQuery } from "./query";
 import {
+  TypeRecord,
   RelationsRecord,
   FragmentOpts,
   QueryOpts,

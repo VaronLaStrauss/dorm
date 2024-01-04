@@ -2,10 +2,9 @@ import {
   PredicateType,
   StringIndex,
   DateTimeIndex,
-  ExtendedType,
   UnionToIntersection,
-  Type,
-} from "..";
+} from "../utils";
+import { ExtendedType, Predicate, Type } from "../classes";
 
 export type Pred =
   | PasswordPredicate
@@ -93,3 +92,5 @@ export type ExtendedPredicates<T extends Type | ExtendedType> =
           typeName: string;
         };
       };
+
+export type PredicateRecord = Record<string, Predicate<PredicateInitOpts>>;

@@ -8,18 +8,14 @@ import {
   IntPredicate,
   PasswordPredicate,
   PredicateInitOpts,
-  RelationsRecord,
   StaticPredicate,
   StringPredicate,
-} from ".";
-import {
-  GeoType,
-  NullableType,
-  PredicateType,
-  Relations,
-  Type,
-  TypeRecord,
-} from "..";
+} from "./predicate.types";
+import { RelationsRecord } from "./relation.types";
+import { TypeRecord } from "./type.types";
+import { GeoType } from "./return.types";
+import { NullableType, PredicateType } from "../utils";
+import { Relations, Type } from "../classes";
 
 export type InferMutationLeaf<Opts extends PredicateInitOpts> = Opts extends
   | FloatPredicate

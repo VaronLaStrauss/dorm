@@ -1,7 +1,8 @@
 import { Query, defaultListLimit } from "../query-schema";
-import { parseFilter } from ".";
+import { parseFilter } from "./functions";
 import { RecurseOpts } from "../types/recurse.types";
-import { Forward, Reverse, TypeRecord, RelationsRecord, QueryOpts } from "..";
+import { Forward, Reverse } from "../classes";
+import { TypeRecord, RelationsRecord, QueryOpts } from "../types";
 
 export type FilterReturn = { node: string; usedVars: Set<string> };
 

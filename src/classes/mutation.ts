@@ -1,5 +1,5 @@
 import { DgraphClient, Txn, Mutation } from "dgraph-js";
-import { Metrics, Latency } from "..";
+import { Metrics, Latency } from "../types";
 
 export class MutClass {
   constructor(private vars: Record<string, unknown>) {}
