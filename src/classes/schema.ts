@@ -1,17 +1,15 @@
-import { DgraphClient, Operation } from "dgraph-js";
-import { Type } from "./type";
-import { Forward, Reverse } from "./relations";
+import {
+  DormMutation,
+  FragmentOpts,
+  QueryOpts,
+  RelationsRecord,
+  TypeRecord,
+} from "../types";
 import { PredicateType } from "../utils";
 import { Fragment } from "./fragment";
 import { DormQuery } from "./query";
-import {
-  TypeRecord,
-  RelationsRecord,
-  FragmentOpts,
-  QueryOpts,
-  DormMutation,
-} from "../types";
-import { MutClass } from "./mutation";
+import { Forward, Reverse } from "./relations";
+import { Type } from "./type";
 
 export class Schema<
   TR extends TypeRecord = TypeRecord,
@@ -45,14 +43,6 @@ export class Schema<
     return schema.join("\n");
   }
 
-  async setSchema(db: DgraphClient) {
-    const schema = this.build();
-    const op = new Operation();
-    op.setSchema(schema);
-    const alterOp = await db.alter(op);
-    return alterOp.getData();
-  }
-
   fragment<key extends keyof TR, FO extends FragmentOpts<TR, key, RR>>(
     typeName: key,
     fragmentOpts: FO,
@@ -84,7 +74,7 @@ export class Schema<
     return new DormQuery<TR, RR, QO>(queries);
   }
 
-  private _mutate<key extends keyof TR, Mut extends DormMutation<TR, RR, key>>(
+  compileMutation<key extends keyof TR, Mut extends DormMutation<TR, RR, key>>(
     key: key,
     mut: Mut
   ) {
@@ -116,8 +106,8 @@ export class Schema<
 
         value =
           value instanceof Array
-            ? value.map((v) => this._mutate(nextType, v as never))
-            : this._mutate(nextType, value as never);
+            ? value.map((v) => this.compileMutation(nextType, v as never))
+            : this.compileMutation(nextType, value as never);
       }
       const mutKey = `${pred.typeName}.${predKey}`;
 
@@ -125,13 +115,6 @@ export class Schema<
     }
 
     return vars;
-  }
-
-  mutate<key extends keyof TR, Mut extends DormMutation<TR, RR, key>>(
-    key: key,
-    mut: Mut
-  ) {
-    return new MutClass(this._mutate(key, mut));
   }
 }
 

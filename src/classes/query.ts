@@ -1,5 +1,4 @@
-import type { DgraphClient, Response, Txn } from "dgraph-js";
-import { QueryOpts, QueryReturn, RelationsRecord, TypeRecord } from "../types";
+import { QueryOpts, RelationsRecord, TypeRecord } from "../types";
 import {
   compileDirectives,
   compileMainFunc,
@@ -45,7 +44,7 @@ export class DormQuery<
     return { query, usedVars };
   }
 
-  build(outsourcedVars: Record<string, unknown> = {}) {
+  compile(outsourcedVars: Record<string, unknown> = {}) {
     const vars: Record<string, unknown> = {};
     const varDec: string[] = [];
 
@@ -67,27 +66,5 @@ export class DormQuery<
     if (varDec.length) query += `(${varDec.join(", ")})`;
     query += `{\n${queries.join("\n")}\n}`;
     return { query, varDec, vars };
-  }
-
-  async execute(
-    dbOrTxn: DgraphClient | Txn,
-    outsourcedVars: Record<string, unknown> = {}
-  ) {
-    const { query, varDec, vars } = this.build(outsourcedVars);
-
-    const txn =
-      "query" in dbOrTxn ? dbOrTxn : dbOrTxn.newTxn({ readOnly: true });
-
-    let res: Promise<Response>;
-    if (varDec.length) res = txn.queryWithVars(query, vars);
-    else res = txn.query(query);
-
-    const data = await res;
-
-    return {
-      data: data.getJson() as QueryReturn<TR, RR, QO>,
-      metrics: data.getMetrics(),
-      latency: data.getLatency(),
-    };
   }
 }

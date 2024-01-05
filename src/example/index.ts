@@ -201,5 +201,5 @@ console.log(
         mainFunc: { op: "type", value: "Psgc" },
       },
     })
-    .build().query
+    .compile().query
 );

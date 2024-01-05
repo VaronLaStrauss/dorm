@@ -1,4 +1,3 @@
-export * from "./dgraph.types";
 export * from "./fragment.types";
 export * from "./mutation.types";
 export * from "./predicate.types";
