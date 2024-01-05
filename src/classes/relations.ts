@@ -1,4 +1,4 @@
-import { Type, ExtendedType } from "./type";
+import type { Type, ExtendedType } from "./type";
 import { PickleReverse, Relation } from "../types";
 
 export class Forward<T extends Type = Type> {
@@ -12,14 +12,14 @@ export class Reverse<
   constructor(public type: T, public field: Field) {}
 }
 
-export function forward<T extends Type>(type: T) {
-  return new Forward(type);
+export function forward<T extends Type>(type: T): Forward<T> {
+  return new Forward<T>(type);
 }
 
 export function reverse<T extends Type, field extends PickleReverse<T>>(
   type: T,
   field: field
-) {
+): Reverse<T, field> {
   return new Reverse(type, field);
 }
 

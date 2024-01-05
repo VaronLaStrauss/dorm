@@ -1,4 +1,4 @@
-import { Forward, Reverse } from "./relations";
+import type { Forward, Reverse } from "./relations";
 import { PredOpts, predicate } from "./predicate";
 import {
   PredicateType,
@@ -227,17 +227,14 @@ export class Type<
         const rels = relations[pred.typeName];
         const rel = rels?.relations[predKey as never]! as Forward | Reverse;
 
-        if (rel instanceof Forward) {
-          const predType = asArray ? `[${rel.type.name}]` : rel.type.name;
-          innerPred += `: ${predType}`;
-          outerPred += " @reverse";
-        } else if (rel instanceof Reverse) {
+        if ("field" in rel) {
           const predType = asArray ? `[${rel.type.name}]` : rel.type.name;
           innerPred = `<~${rel.type.name}.${rel.field}>: ${predType}`;
           outerPred = "";
         } else {
-          outerPred = `# Incorrect implementation of ${innerPred}`;
-          innerPred = `# Incorrect implementation of ${innerPred}`;
+          const predType = asArray ? `[${rel.type.name}]` : rel.type.name;
+          innerPred += `: ${predType}`;
+          outerPred += " @reverse";
         }
       }
 

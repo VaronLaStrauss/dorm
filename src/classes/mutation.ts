@@ -1,12 +1,11 @@
-import { DgraphClient, Txn, Mutation } from "dgraph-js";
+import { Mutation, type DgraphClient, type Txn } from "dgraph-js";
 import { Metrics, Latency } from "../types";
 
 export class MutClass {
   constructor(private vars: Record<string, unknown>) {}
 
   async execute(dbOrTxn: DgraphClient | Txn, commit = true, del = false) {
-    const txn =
-      dbOrTxn instanceof DgraphClient ? dbOrTxn.newTxn() : (dbOrTxn as Txn);
+    const txn = "query" in dbOrTxn ? dbOrTxn : dbOrTxn.newTxn();
     const mutx = new Mutation();
 
     if (del) mutx.setDeleteJson(this.vars);

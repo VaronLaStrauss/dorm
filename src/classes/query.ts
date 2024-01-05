@@ -1,12 +1,11 @@
-import { DgraphClient, Txn } from "dgraph-js";
-import { Schema } from "./schema";
-import { RelationsRecord, QueryOpts, TypeRecord, QueryReturn } from "../types";
+import type { DgraphClient, Response, Txn } from "dgraph-js";
+import { QueryOpts, QueryReturn, RelationsRecord, TypeRecord } from "../types";
 import {
-  spacing,
   compileDirectives,
   compileMainFunc,
   compileRecurse,
   parseDqlType,
+  spacing,
 } from "../utils";
 
 export class DormQuery<
@@ -56,7 +55,10 @@ export class DormQuery<
       queries.push(query);
       for (let [key, val] of usedVars) {
         if (key in outsourcedVars) val = outsourcedVars[key];
-        vars[key] = val;
+        if (!val) continue;
+        let actualVal = String(val);
+        if (val instanceof Array) actualVal = `[${actualVal}]`;
+        vars[key] = actualVal;
         varDec.push(`${key}: ${parseDqlType(val)}`);
       }
     }
@@ -74,10 +76,9 @@ export class DormQuery<
     const { query, varDec, vars } = this.build(outsourcedVars);
 
     const txn =
-      dbOrTxn instanceof DgraphClient
-        ? dbOrTxn.newTxn({ readOnly: true })
-        : dbOrTxn;
-    let res: ReturnType<typeof txn.queryWithVars>;
+      "query" in dbOrTxn ? dbOrTxn : dbOrTxn.newTxn({ readOnly: true });
+
+    let res: Promise<Response>;
     if (varDec.length) res = txn.queryWithVars(query, vars);
     else res = txn.query(query);
 
