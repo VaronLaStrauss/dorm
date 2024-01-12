@@ -87,7 +87,7 @@ export class Schema<
         vars["uid"] = value;
         continue;
       }
-      if (predKey === "type") {
+      if (predKey === "dtype") {
         vars["dgraph.type"] = value;
         continue;
       }
