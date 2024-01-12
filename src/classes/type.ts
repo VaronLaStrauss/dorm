@@ -34,6 +34,10 @@ export class Type<
     return this.predicateRecord;
   }
 
+  get typeNames(): string[] {
+    return [this.name];
+  }
+
   buildPreds<TR extends TypeRecord, key extends keyof TR>(
     opts: FragmentOpts<TR, key, RelationsRecord<TR>>,
     relations: RelationsRecord<TR>,
@@ -275,6 +279,10 @@ export class ExtendedType<
     return { ...this.predicateRecord, ...extended } as ExtendedPredicates<
       typeof this
     >;
+  }
+
+  override get typeNames() {
+    return [this.name, ...this.extendedTypes.flatMap((t) => t.typeNames)];
   }
 }
 
