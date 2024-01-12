@@ -148,9 +148,9 @@ export type DormMutation<
   PrevType extends Type | undefined = undefined
 > =
   | (InferMutation<TR, RR, TypeName, PrevType> & {
-      type: string[];
+      dtype: string[];
     })
   | (Partial<InferMutation<TR, RR, TypeName, PrevType>> & {
       uid: string;
-      type?: string[];
+      dtype?: string[];
     });
