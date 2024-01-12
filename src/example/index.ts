@@ -136,23 +136,23 @@ const frag = db.fragment("Audit", {
 // console.log(frag.execute().user.branch.);
 // console.log(frag.fragment);
 
-const mut = db.mutate("User", {
+const mut = db.compileMutation("User", {
   activeType: "active",
-  audits: [
-    {
-      date: "",
-      user: none(),
-      type: ["waw"],
-      // uid: ''
-    },
-  ],
+  // audits: [
+  //   {
+  //     date: "",
+  //     user: none(),
+  //     dtype: ["waw"],
+  //     // uid: ''
+  //   },
+  // ],
   // audits: none(),
+
   branch: {
     uid: "0x121",
   },
   email: "waw",
   password: "aw",
-  type: [],
   // uid: "",
   // name: "wa",
   // uid: 'waw'
