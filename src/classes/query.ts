@@ -24,11 +24,18 @@ export class DormQuery<
     }
   }
 
-  buildOneQuery<key extends keyof QO & string>(key: key, space = 1) {
+  buildOneQuery<key extends keyof QO & string>(
+    key: key,
+    _usedVars: Map<string, unknown>,
+    space = 1
+  ) {
     const _space = spacing(space);
     const q = this.queries[key];
     const { filter, cascade, fragment, recurse } = q;
-    const usedVars = new Map<string, unknown>(q.fragment?.usedVars);
+    const usedVars = new Map<string, unknown>([
+      ...(q.fragment?.usedVars ?? []),
+      ..._usedVars,
+    ]);
 
     const directives = compileDirectives(
       { filter, cascade },
@@ -46,11 +53,13 @@ export class DormQuery<
 
   compile(outsourcedVars: Record<string, unknown> = {}) {
     const vars: Record<string, unknown> = {};
-    const varDec: string[] = [];
+    const varDec = new Set<string>();
 
     const queries: string[] = [];
+    let _usedVars = new Map<string, unknown>();
     for (const queryKey in this.queries) {
-      const { query, usedVars } = this.buildOneQuery(queryKey);
+      const { query, usedVars } = this.buildOneQuery(queryKey, _usedVars);
+      _usedVars = new Map<string, unknown>([..._usedVars, ...usedVars]);
       queries.push(query);
       for (let [key, val] of usedVars) {
         if (key in outsourcedVars) val = outsourcedVars[key];
@@ -58,13 +67,14 @@ export class DormQuery<
         let actualVal = String(val);
         if (val instanceof Array) actualVal = `[${actualVal}]`;
         vars[key] = actualVal;
-        varDec.push(`${key}: ${parseDqlType(val)}`);
+        varDec.add(`${key}: ${parseDqlType(val)}`);
       }
     }
 
     let query = `query q`;
-    if (varDec.length) query += `(${varDec.join(", ")})`;
+    let _varDec = Array.from(varDec);
+    if (varDec.size) query += `(${_varDec.join(", ")})`;
     query += `{\n${queries.join("\n")}\n}`;
-    return { query, varDec, vars };
+    return { query, varDec: _varDec, vars };
   }
 }
