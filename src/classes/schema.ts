@@ -80,6 +80,7 @@ export class Schema<
   ) {
     const vars: Record<string, unknown> = {};
     const preds = this.types[key].extendedPreds();
+
     for (const predKey in mut) {
       let value: unknown = mut[predKey];
 
@@ -96,23 +97,13 @@ export class Schema<
       }
 
       const pred = preds[predKey];
-
-      if (pred.options.type === PredicateType.NODE) {
-        const next = this.relations[key]!.relations[predKey as never]! as
-          | Forward
-          | Reverse;
-
-        const nextType = next.type.name;
-
-        value =
-          value instanceof Array
-            ? value.map((v) => this.compileMutation(nextType, v as never))
-            : this.compileMutation(nextType, value as never);
-      }
+      if (pred.options.type === PredicateType.NODE) value = mut[predKey];
       const mutKey = `${pred.typeName}.${predKey}`;
 
       vars[mutKey] = value;
     }
+
+    if (!("dtype" in mut)) vars["dgraph.type"] = this.types[key].typeNames;
 
     return vars;
   }

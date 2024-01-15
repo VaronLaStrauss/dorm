@@ -75,73 +75,48 @@ export type PickleNonNullableFields<
 
 export type _InferMutation<
   TR extends TypeRecord,
-  RR extends RelationsRecord<TR>,
   TypeName extends keyof TR,
   key extends keyof EP,
-  PrevType extends Type | undefined,
   EP extends ExtendedPredicates<TR[TypeName]> = ExtendedPredicates<TR[TypeName]>
 > = EP[key]["options"]["type"] extends PredicateType.NODE
-  ? TypeName extends keyof RR
-    ? RR[TypeName] extends Relations<TR[TypeName]>
-      ? key extends keyof RR[TypeName]["relations"]
-        ? RR[TypeName]["relations"][key]["type"]["name"] extends keyof TR
-          ? PrevType extends RR[TypeName]["relations"][key]["type"]
-            ? never
-            : NullableType<
-                EP[key]["options"],
-                DormMutation<
-                  TR,
-                  RR,
-                  RR[TypeName]["relations"][key]["type"]["name"],
-                  TR[TypeName]
-                >
-              >
-          : never
-        : never
-      : never
-    : never
+  ? NullableType<EP[key]["options"], object>
   : MutationLeafOpts<EP[key]["options"]>;
 
 export type MutationNullableFields<
   TR extends TypeRecord,
   RR extends RelationsRecord<TR>,
   TypeName extends keyof TR,
-  PrevType extends Type | undefined,
   EP extends ExtendedPredicates<TR[TypeName]> = ExtendedPredicates<TR[TypeName]>
 > = {
   [key in keyof Pick<
     EP,
     PickleNullableFields<TR, RR, TypeName>
-  >]?: _InferMutation<TR, RR, TypeName, key, PrevType>;
+  >]?: _InferMutation<TR, TypeName, key>;
 };
 
 export type MutationNonNullableFields<
   TR extends TypeRecord,
-  RR extends RelationsRecord<TR>,
   TypeName extends keyof TR,
-  PrevType extends Type | undefined,
   EP extends ExtendedPredicates<TR[TypeName]> = ExtendedPredicates<TR[TypeName]>
 > = {
   [key in keyof Pick<
     EP,
     PickleNonNullableFields<TR, TypeName>
-  >]: _InferMutation<TR, RR, TypeName, key, PrevType>;
+  >]: _InferMutation<TR, TypeName, key>;
 };
 
 export type InferMutation<
   TR extends TypeRecord,
   RR extends RelationsRecord<TR>,
-  TypeName extends keyof TR,
-  PrevType extends Type | undefined
-> = MutationNonNullableFields<TR, RR, TypeName, PrevType> &
-  MutationNullableFields<TR, RR, TypeName, PrevType>;
+  TypeName extends keyof TR
+> = MutationNonNullableFields<TR, TypeName> &
+  MutationNullableFields<TR, RR, TypeName>;
 
 export type DormMutation<
   TR extends TypeRecord,
   RR extends RelationsRecord<TR>,
-  TypeName extends keyof TR,
-  PrevType extends Type | undefined = undefined
-> = Partial<InferMutation<TR, RR, TypeName, PrevType>> & {
+  TypeName extends keyof TR
+> = Partial<InferMutation<TR, RR, TypeName>> & {
   uid?: string;
   dtype?: string[];
 };
