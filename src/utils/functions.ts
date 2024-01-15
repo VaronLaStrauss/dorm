@@ -32,6 +32,10 @@ export function parseFilter(
 ) {
   if (!(filter.op in AllIndexes))
     throw new Error("Cannot do filter if operator is not a func");
+  if ("value" in filter) if (!filter.value) return undefined;
+  if ("values" in filter)
+    if (!filter.values || !filter.values[0] || !filter.values[1])
+      return undefined;
 
   if (filter.op === "uid") {
     const varKey = parseFilterValue(filter.value, usedVars, allowedValues);

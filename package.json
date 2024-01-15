@@ -2,14 +2,11 @@
   "name": "dorm",
   "module": "index.ts",
   "type": "module",
-  "version": "1.4.2",
+  "version": "1.5.0",
   "devDependencies": {
     "bun-types": "latest"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
-  },
-  "dependencies": {
-    "elysia": "~0.8.0"
   }
 }

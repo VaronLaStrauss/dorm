@@ -1,4 +1,4 @@
-import { Query, defaultListLimit } from "../query-schema";
+import { Query } from "../query-schema";
 import { parseFilter } from "./functions";
 import { RecurseOpts } from "../types/recurse.types";
 import { Forward, Reverse } from "../classes";
@@ -102,10 +102,12 @@ export function compileFilter(
 
 export function compilePage(page: Query["page"]) {
   if (!page) return;
+  const { limit, offset } = page;
+  let _page = "";
+  _page += limit ? `first: ${limit} ` : "";
+  _page += offset ? `offset: ${offset} ` : "";
 
-  return `first: ${page.limit ?? defaultListLimit}, offset: ${
-    page.offset ?? 0
-  }`;
+  return _page;
 }
 
 export function compileOrder(
