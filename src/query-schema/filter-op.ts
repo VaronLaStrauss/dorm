@@ -40,8 +40,10 @@ export type PredFuncs<
         ? (typeof DateTimeIndex)[EP[AP]["options"]["indexes"][number]]
         : EP[AP]["options"]["type"] extends PredicateType.GEO
         ? typeof GeoIndex
-        : typeof DefaultIndex) &
-        typeof Indexless
+        : typeof DefaultIndex) & {
+        has: (typeof Indexless)["has"];
+        uid_in: (typeof Indexless)["uid_in"];
+      }
 >;
 
 export type AllowedFilter<
@@ -89,7 +91,7 @@ export function typeFilter<
   } satisfies ExtendedAllowedFilter<T, "type", VN, [T["name"]]>;
 }
 
-export function defaultFilter<T extends Type>(type: T) {
+export function defaultFilters<T extends Type>(type: T) {
   return {
     uid: uidFilter(type),
     type: typeFilter(type),
@@ -107,7 +109,10 @@ export function allowedFilter<
   viewName: VN,
   allowedValues: AV = undefined as AV
 ): ExtendedAllowedFilter<T, AP, VN, AV> {
-  let indexes: Record<string, unknown> = {};
+  let indexes: Record<string, unknown> = {
+    has: Indexless["has"],
+    uid_in: Indexless["uid_in"],
+  };
 
   const { options } = type.extendedPreds()[predName];
 
