@@ -1,5 +1,5 @@
 import { ExtendedPredicates } from "../types";
-import { Type } from "../classes";
+import { Type, fromValues } from "../classes";
 import {
   DateTimeIndex,
   DefaultIndex,
@@ -23,11 +23,13 @@ export type AllowedPreds<T extends Type> =
 
 export type PredFuncs<
   T extends Type,
-  AP extends AllowedPreds<T> | "uid",
+  AP extends AllowedPreds<T> | "uid" | "type",
   EP extends ExtendedPredicates<T> = ExtendedPredicates<T>
 > = UnionToIntersection<
   AP extends "uid"
-    ? typeof Indexless
+    ? { uid: (typeof Indexless)["uid"] }
+    : AP extends "type"
+    ? { type: (typeof Indexless)["type"] }
     : (EP[AP]["options"] extends {
         indexes: Array<keyof typeof StringIndex>;
       }
@@ -44,16 +46,59 @@ export type PredFuncs<
 
 export type AllowedFilter<
   T extends Type,
-  AP extends AllowedPreds<T> | "uid"
+  AP extends AllowedPreds<T> | "uid" | "type"
 > = {
   ops: PredFuncs<T, AP>;
   typeName: T["name"];
-  field: AP extends "uid" ? "uid" : `${T["name"]}.${AP}`;
+  field: AP extends "uid"
+    ? "uid"
+    : AP extends "type"
+    ? T["name"]
+    : `${T["name"]}.${AP}`;
 };
+
+export type ExtendedAllowedFilter<
+  T extends Type,
+  AP extends AllowedPreds<T> | "uid" | "type",
+  VN extends string | undefined = undefined,
+  AV extends unknown[] | undefined = undefined
+> = AllowedFilter<T, AP> & { alias: VN; allowedValues: AV };
+
+export function uidFilter<
+  T extends Type,
+  VN extends string | undefined = `${T["name"]} ID`
+>(type: T, alias: VN = `${type.name} ID` as VN) {
+  return {
+    field: "uid",
+    ops: { uid: Indexless.uid },
+    typeName: type.name as T["name"],
+    alias,
+  } satisfies AllowedFilter<T, "uid"> & { alias: VN };
+}
+
+export function typeFilter<
+  T extends Type,
+  VN extends string | undefined = "Type"
+>(type: T, alias: VN = "Type" as VN) {
+  return {
+    field: type.name as T["name"],
+    ops: { type: Indexless.type },
+    typeName: type.name as T["name"],
+    alias,
+    allowedValues: fromValues(type.name) as [T["name"]],
+  } satisfies ExtendedAllowedFilter<T, "type", VN, [T["name"]]>;
+}
+
+export function defaultFilter<T extends Type>(type: T) {
+  return {
+    uid: uidFilter(type),
+    type: typeFilter(type),
+  };
+}
 
 export function allowedFilter<
   T extends Type,
-  AP extends AllowedPreds<T> | "uid",
+  AP extends AllowedPreds<T>,
   VN extends string | undefined = undefined,
   AV extends unknown[] | undefined = undefined
 >(
@@ -61,17 +106,8 @@ export function allowedFilter<
   predName: AP,
   viewName: VN,
   allowedValues: AV = undefined as AV
-): AllowedFilter<T, AP> & { alias: VN; allowedValues: AV } {
-  let indexes: Record<string, unknown> = { ...Indexless };
-
-  if (predName === "uid")
-    return {
-      alias: viewName,
-      field: "uid" as never,
-      typeName: type.name,
-      ops: indexes as never,
-      allowedValues,
-    };
+): ExtendedAllowedFilter<T, AP, VN, AV> {
+  let indexes: Record<string, unknown> = {};
 
   const { options } = type.extendedPreds()[predName];
 
