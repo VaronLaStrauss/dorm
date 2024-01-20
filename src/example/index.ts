@@ -1,4 +1,4 @@
-import { none } from "..";
+import { allowedFilter, none, typeFilter, uidFilter } from "..";
 import { PredicateType } from "../utils/pred-type";
 import {
   fromValues,
@@ -53,6 +53,10 @@ const UserRel = relations(User, {
 const AuditRel = relations(Audit, {
   user: forward(User),
 });
+
+const userAP = uidFilter(User);
+const userAP2 = allowedFilter(User, "name", "YEs");
+const userAP3 = typeFilter(User);
 
 const PsgcType = fromValues(
   "region",
