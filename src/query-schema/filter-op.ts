@@ -1,4 +1,4 @@
-import { ExtendedPredicates } from "../types";
+import { ExtendedPredicates, PredicateInitOpts } from "../types";
 import { Type, fromValues } from "../classes";
 import {
   DateTimeIndex,
@@ -53,6 +53,7 @@ export type AllowedFilter<
 > = {
   ops: PredFuncs<T, AP>;
   typeName: T["name"];
+  jsType: "number" | "string" | "date" | "boolean";
   field:
     | (AP extends "uid"
         ? "uid"
@@ -79,6 +80,7 @@ export function uidFilter<
     ops: { uid: Indexless.uid },
     typeName: type.name as T["name"],
     alias,
+    jsType: "string",
   } satisfies AllowedFilter<T, "uid", VN>;
 }
 
@@ -92,6 +94,7 @@ export function typeFilter<T extends Type, VN extends string = "Type">(
     typeName: type.name as T["name"],
     alias,
     allowedValues: fromValues(type.name) as [T["name"]],
+    jsType: "string",
   } satisfies ExtendedAllowedFilter<T, "type", VN, [T["name"]]>;
 }
 
@@ -155,5 +158,18 @@ export function allowedFilter<
     typeName: type.name,
     ops: indexes as never,
     allowedValues,
+    jsType: parseJsType(options),
   };
+}
+
+function parseJsType(ops: PredicateInitOpts): AllowedFilter<Type>["jsType"] {
+  if (ops.type === PredicateType.BOOL) return "boolean";
+  if (ops.type === PredicateType.DATETIME) return "date";
+  if (
+    ops.type === PredicateType.FLOAT ||
+    ops.type === PredicateType.INT ||
+    ops.type === PredicateType.GEO
+  )
+    return "number";
+  return "string";
 }
