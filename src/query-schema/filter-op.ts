@@ -48,40 +48,44 @@ export type PredFuncs<
 
 export type AllowedFilter<
   T extends Type,
-  AP extends AllowedPreds<T> | "uid" | "type"
+  AP extends AllowedPreds<T> | "uid" | "type" = AllowedPreds<T>,
+  VN extends string = string
 > = {
   ops: PredFuncs<T, AP>;
   typeName: T["name"];
-  field: AP extends "uid"
-    ? "uid"
-    : AP extends "type"
-    ? T["name"]
-    : `${T["name"]}.${AP}`;
+  field:
+    | (AP extends "uid"
+        ? "uid"
+        : AP extends "type"
+        ? T["name"]
+        : `${T["name"]}.${AP}`)
+    | string;
+  alias: VN;
 };
 
 export type ExtendedAllowedFilter<
   T extends Type,
-  AP extends AllowedPreds<T> | "uid" | "type",
-  VN extends string | undefined = undefined,
+  AP extends AllowedPreds<T> | "uid" | "type" = AllowedPreds<T>,
+  VN extends string = string,
   AV extends unknown[] | undefined = undefined
-> = AllowedFilter<T, AP> & { alias: VN; allowedValues: AV };
+> = AllowedFilter<T, AP, VN> & { allowedValues: AV };
 
 export function uidFilter<
   T extends Type,
-  VN extends string | undefined = `${T["name"]} ID`
+  VN extends string = `${T["name"]} ID`
 >(type: T, alias: VN = `${type.name} ID` as VN) {
   return {
     field: "uid",
     ops: { uid: Indexless.uid },
     typeName: type.name as T["name"],
     alias,
-  } satisfies AllowedFilter<T, "uid"> & { alias: VN };
+  } satisfies AllowedFilter<T, "uid", VN>;
 }
 
-export function typeFilter<
-  T extends Type,
-  VN extends string | undefined = "Type"
->(type: T, alias: VN = "Type" as VN) {
+export function typeFilter<T extends Type, VN extends string = "Type">(
+  type: T,
+  alias: VN = "Type" as VN
+) {
   return {
     field: type.name as T["name"],
     ops: { type: Indexless.type },
@@ -101,7 +105,7 @@ export function defaultFilters<T extends Type>(type: T) {
 export function allowedFilter<
   T extends Type,
   AP extends AllowedPreds<T>,
-  VN extends string | undefined = undefined,
+  VN extends string,
   AV extends unknown[] | undefined = undefined
 >(
   type: T,
