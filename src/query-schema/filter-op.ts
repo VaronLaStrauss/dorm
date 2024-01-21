@@ -86,7 +86,7 @@ export function uidFilter<
 
 export function typeFilter<T extends Type, VN extends string = "Type">(
   type: T,
-  alias: VN = "Type" as VN
+  alias: VN = `${type.name}` as VN
 ) {
   return {
     field: type.name as T["name"],
