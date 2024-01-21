@@ -1,5 +1,5 @@
+import { Type } from "../classes";
 import { ExtendedPredicates, PredicateInitOpts } from "../types";
-import { Type, fromValues } from "../classes";
 import {
   DateTimeIndex,
   DefaultIndex,
@@ -10,10 +10,15 @@ import {
   UnionToIntersection,
 } from "../utils";
 
-export type PickleFilterable<T extends Type> = {
-  [key in keyof ExtendedPredicates<T>]: ExtendedPredicates<T>[key]["options"] extends {
+export type PickleFilterable<
+  T extends Type,
+  EP extends ExtendedPredicates<T> = ExtendedPredicates<T>
+> = {
+  [key in keyof EP]: EP[key]["options"] extends {
     indexes: true | Array<string>;
   }
+    ? key
+    : EP[key]["options"]["type"] extends PredicateType.NODE
     ? key
     : never;
 }[keyof ExtendedPredicates<T>];
@@ -30,6 +35,8 @@ export type PredFuncs<
     ? { uid: (typeof Indexless)["uid"] }
     : AP extends "type"
     ? { type: (typeof Indexless)["type"] }
+    : EP[AP]["options"]["type"] extends PredicateType.NODE
+    ? { uid_in: (typeof Indexless)["uid_in"] }
     : (EP[AP]["options"] extends {
         indexes: Array<keyof typeof StringIndex>;
       }
@@ -42,7 +49,6 @@ export type PredFuncs<
         ? typeof GeoIndex
         : typeof DefaultIndex) & {
         has: (typeof Indexless)["has"];
-        uid_in: (typeof Indexless)["uid_in"];
       }
 >;
 
@@ -55,11 +61,12 @@ export type AllowedFilter<
   typeName: T["name"];
   jsType: "number" | "string" | "date" | "boolean";
   field:
-    | (AP extends "uid"
+    | ((AP extends "uid"
         ? "uid"
         : AP extends "type"
         ? T["name"]
-        : `${T["name"]}.${AP}`)
+        : `${T["name"]}.${AP}`) &
+        string)
     | string;
   alias: VN;
 };
@@ -93,9 +100,8 @@ export function typeFilter<T extends Type, VN extends string = T["name"]>(
     ops: { type: Indexless.type },
     typeName: type.name as T["name"],
     alias,
-    allowedValues: fromValues(type.name) as [T["name"]],
     jsType: "string",
-  } satisfies ExtendedAllowedFilter<T, "type", VN, [T["name"]]>;
+  } satisfies AllowedFilter<T, "type", VN>;
 }
 
 export function defaultFilters<T extends Type>(type: T) {
@@ -118,7 +124,6 @@ export function allowedFilter<
 ): ExtendedAllowedFilter<T, AP, VN, AV> {
   let indexes: Record<string, unknown> = {
     has: Indexless["has"],
-    uid_in: Indexless["uid_in"],
   };
 
   const { options } = type.extendedPreds()[predName];
