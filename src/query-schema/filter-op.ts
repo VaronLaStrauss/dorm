@@ -84,7 +84,7 @@ export function uidFilter<
   } satisfies AllowedFilter<T, "uid", VN>;
 }
 
-export function typeFilter<T extends Type, VN extends string = "Type">(
+export function typeFilter<T extends Type, VN extends string = T["name"]>(
   type: T,
   alias: VN = `${type.name}` as VN
 ) {
