@@ -23,7 +23,7 @@ export type QueryVariables = Record<string, any>;
 export type QueryFilterOpts = {
   page?: Page;
   cascade?: Cascade;
-  order?: [Order | undefined, Order | undefined];
+  order?: [Order | undefined | null, Order | undefined | null];
 };
 
 export type Query = {
