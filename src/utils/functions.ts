@@ -1,5 +1,6 @@
 import { AllIndexes } from "./indexes";
 import { FilterValue } from "../query-schema";
+import { v4 } from "uuid";
 
 export function parseDqlType(value: unknown) {
   const type = typeof value;
@@ -71,9 +72,17 @@ function parseFilterValue(
   const varKey =
     typeof value === "string" && allowedValues.has(value)
       ? value
-      : `$f${usedVars.size}`;
+      : getFilterKey(usedVars);
   if (varKey !== value) usedVars.set(varKey, value);
   return varKey;
+}
+
+function getFilterKey(usedVars: Map<string, unknown>) {
+  let varName = `$f${v4().split("-")[0]}`;
+  while (usedVars.has(varName)) {
+    varName = `$f${v4().split("-")[0]}`;
+  }
+  return varName;
 }
 
 export function spacing(level: number) {

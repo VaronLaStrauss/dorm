@@ -4,9 +4,13 @@
   "type": "module",
   "version": "1.5.3",
   "devDependencies": {
+    "@types/uuid": "^9.0.8",
     "bun-types": "latest"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "uuid": "^9.0.1"
   }
 }
