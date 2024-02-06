@@ -103,11 +103,11 @@ export function compileFilter(
 export function compilePage(page: Query["page"]) {
   if (!page) return;
   const { limit, offset } = page;
-  let _page = "";
-  _page += limit ? `first: ${limit} ` : "";
-  _page += offset ? `offset: ${offset} ` : "";
+  const _page = [];
+  _page.push(limit ? `first: ${limit} ` : "")
+  _page.push(offset ? `offset: ${offset} ` : "");
 
-  return _page;
+  return _page.filter(v => !!v).join(', ');
 }
 
 export function compileOrder(
