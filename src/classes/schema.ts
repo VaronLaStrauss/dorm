@@ -8,12 +8,11 @@ import {
 import { PredicateType } from "../utils";
 import { Fragment } from "./fragment";
 import { DormQuery } from "./query";
-import { Forward, Reverse } from "./relations";
 import { Type } from "./type";
 
 export class Schema<
-  TR extends TypeRecord = TypeRecord,
-  RR extends RelationsRecord<TR> = RelationsRecord<TR>
+  TR extends TypeRecord,
+  RR extends RelationsRecord<TR>
 > {
   allowedValues = new Set<string>();
 
