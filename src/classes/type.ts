@@ -176,7 +176,7 @@ export class Type<
       return `${_space}${relationStr} ${directives}`;
 
     const builtPreds = this.buildPreds(
-      w,
+      w as never,
       relations,
       usedVars,
       allowedValues,
