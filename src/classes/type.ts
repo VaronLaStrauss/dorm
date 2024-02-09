@@ -50,6 +50,9 @@ export class Type<
     const inners: string[] = [];
     const relation = relations[this.name]!;
 
+
+
+
     for (const predKey in opts) {
       const predOpt = opts[predKey];
       const pred = preds[predKey];
@@ -80,12 +83,11 @@ export class Type<
         continue;
       }
 
-      const { type } = relation.relations[predKey as never] as {
-        type: Type;
-      };
+      const { type, extendedFrom } = relation.relations[predKey as never] as Forward | Reverse;
+
 
       const inner = type.build(
-        this.name,
+        extendedFrom?.name ?? this.name,
         predKey,
         predOpt as WithFragment<never, never, never>,
         relations,
