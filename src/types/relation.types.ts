@@ -3,11 +3,11 @@ import { PredicateType, _PicklePredicates } from "../utils";
 import { ExtendedPredicates } from "./predicate.types";
 import { TypeRecord } from "./type.types";
 
-export type PickleReverse<T extends Type> = {
-  [key in keyof T["predicateRecord"]]: T["predicateRecord"][key]["options"]["type"] extends PredicateType.NODE
+export type PickleReverse<T extends Type, EP extends ExtendedPredicates<T> = ExtendedPredicates<T>> = {
+  [key in keyof EP]: EP[key]["options"]["type"] extends PredicateType.NODE
   ? key
   : never;
-}[keyof T["predicateRecord"]];
+}[keyof EP];
 
 export type Relation<T extends Type | ExtendedType> = {
   [key in keyof Pick<
