@@ -1,5 +1,5 @@
 import { Schema } from "./schema";
-import {
+import type {
   TypeRecord,
   RelationsRecord,
   FragmentOpts,

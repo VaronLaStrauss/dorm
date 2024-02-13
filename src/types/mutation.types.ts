@@ -1,6 +1,6 @@
-import { Forward, Relations, Type } from "../classes";
-import { NullableType, PredicateType } from "../utils";
-import {
+import type { Relations } from "../classes";
+import type { PredicateType, NullableType } from "../utils";
+import type {
   BoolPredicate,
   DateTimePredicate,
   ExtendedPredicates,
@@ -13,9 +13,9 @@ import {
   StaticPredicate,
   StringPredicate,
 } from "./predicate.types";
-import { RelationsRecord } from "./relation.types";
-import { GeoType } from "./return.types";
-import { TypeRecord } from "./type.types";
+import type { RelationsRecord } from "./relation.types";
+import type { GeoType } from "./return.types";
+import type { TypeRecord } from "./type.types";
 
 export type InferMutationLeaf<Opts extends PredicateInitOpts> = Opts extends
   | FloatPredicate

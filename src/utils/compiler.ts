@@ -1,8 +1,8 @@
-import { Query } from "../query-schema";
+import type { Query } from "../query-schema";
 import { parseFilter } from "./functions";
-import { RecurseOpts } from "../types/recurse.types";
+import type { RecurseOpts } from "../types/recurse.types";
 import { Forward, Reverse } from "../classes";
-import { TypeRecord, RelationsRecord, QueryOpts } from "../types";
+import type { TypeRecord, RelationsRecord, QueryOpts } from "../types";
 
 export type FilterReturn = { node: string; usedVars: Set<string> };
 
@@ -104,10 +104,10 @@ export function compilePage(page: Query["page"]) {
   if (!page) return;
   const { limit, offset } = page;
   const _page = [];
-  _page.push(limit ? `first: ${limit} ` : "")
+  _page.push(limit ? `first: ${limit} ` : "");
   _page.push(offset ? `offset: ${offset} ` : "");
 
-  return _page.filter(v => !!v).join(', ');
+  return _page.filter((v) => !!v).join(", ");
 }
 
 export function compileOrder(

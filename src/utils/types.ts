@@ -1,4 +1,4 @@
-import { PredicateInitOpts, PredicateRecord } from "../types";
+import type { PredicateInitOpts, PredicateRecord } from "../types";
 import { PredicateType } from "./pred-type";
 
 export type UnionToIntersection<U> = (

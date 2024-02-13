@@ -1,4 +1,4 @@
-import {
+import type {
   BoolPredicate,
   DateTimePredicate,
   ExtendedPredicates,
@@ -11,16 +11,16 @@ import {
   PredicateInitOpts,
   StringPredicate,
 } from "./predicate.types";
-import { RelationsRecord } from "./relation.types";
-import { WithFragment, FragmentOpts } from "./fragment.types";
-import { TypeRecord } from "./type.types";
-import {
+import type { RelationsRecord } from "./relation.types";
+import type { WithFragment, FragmentOpts } from "./fragment.types";
+import type { TypeRecord } from "./type.types";
+import type {
   Composite,
   NullableType,
   PredicateType,
   UnionToIntersection,
 } from "../utils";
-import {
+import type {
   Fragment,
   Forward,
   Relations,
