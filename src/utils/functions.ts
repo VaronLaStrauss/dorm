@@ -1,5 +1,5 @@
 import { AllIndexes } from "./indexes";
-import { FilterValue } from "../query-schema";
+import type { FilterValue } from "../query-schema";
 import { v4 } from "uuid";
 
 export function parseDqlType(value: unknown) {

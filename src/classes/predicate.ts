@@ -1,4 +1,4 @@
-import { PredicateInitOpts } from "../types";
+import type { PredicateInitOpts } from "../types";
 import { spacing, PredicateType, compileAsVar } from "../utils";
 
 export function fromValues<T extends Readonly<string>>(...vals: T[]) {
