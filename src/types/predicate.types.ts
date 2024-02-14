@@ -1,10 +1,10 @@
-import {
+import type {
   PredicateType,
   StringIndex,
   DateTimeIndex,
   UnionToIntersection,
 } from "../utils";
-import { ExtendedType, Predicate, Type } from "../classes";
+import type { ExtendedType, Predicate, Type } from "../classes";
 
 export type Pred =
   | PasswordPredicate

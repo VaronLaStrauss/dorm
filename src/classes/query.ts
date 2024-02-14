@@ -1,4 +1,4 @@
-import { QueryOpts, RelationsRecord, TypeRecord } from "../types";
+import type { QueryOpts, RelationsRecord, TypeRecord } from "../types";
 import {
   compileDirectives,
   compileMainFunc,

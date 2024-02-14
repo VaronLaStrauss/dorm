@@ -1,5 +1,5 @@
 import { Type } from "../classes";
-import { ExtendedPredicates, PredicateInitOpts } from "../types";
+import type { ExtendedPredicates, PredicateInitOpts } from "../types";
 import {
   DateTimeIndex,
   DefaultIndex,
@@ -7,7 +7,7 @@ import {
   Indexless,
   PredicateType,
   StringIndex,
-  UnionToIntersection,
+  type UnionToIntersection,
 } from "../utils";
 
 export type PickleFilterable<

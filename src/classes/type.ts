@@ -1,12 +1,12 @@
 import type { Forward, Reverse } from "./relations";
-import { PredOpts, predicate } from "./predicate";
+import { type PredOpts, predicate } from "./predicate";
 import {
   PredicateType,
   spacing,
   forwardReverseType,
   compileDirectives,
 } from "../utils";
-import {
+import type {
   ExtendedTypes,
   FragmentOpts,
   RelationsRecord,
@@ -50,9 +50,6 @@ export class Type<
     const inners: string[] = [];
     const relation = relations[this.name]!;
 
-
-
-
     for (const predKey in opts) {
       const predOpt = opts[predKey];
       const pred = preds[predKey];
@@ -83,8 +80,9 @@ export class Type<
         continue;
       }
 
-      const { type, extendedFrom } = relation.relations[predKey as never] as Forward | Reverse;
-
+      const { type, extendedFrom } = relation.relations[predKey as never] as
+        | Forward
+        | Reverse;
 
       const inner = type.build(
         extendedFrom?.name ?? this.name,

@@ -11,16 +11,16 @@ import type {
   PredicateInitOpts,
   StringPredicate,
 } from "./predicate.types";
-import { RelationsRecord } from "./relation.types";
+import type { RelationsRecord } from "./relation.types";
 import type { WithFragment, FragmentOpts } from "./fragment.types";
 import type { TypeRecord } from "./type.types";
-import {
-  type Composite,
-  type NullableType,
+import type {
+  Composite,
+  NullableType,
   PredicateType,
   type UnionToIntersection,
 } from "../utils";
-import {
+import type {
   Fragment,
   Forward,
   Relations,

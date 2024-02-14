@@ -1,4 +1,4 @@
-import {
+import type {
   DormMutation,
   FragmentOpts,
   QueryOpts,
@@ -10,10 +10,7 @@ import { Fragment } from "./fragment";
 import { DormQuery } from "./query";
 import { Type } from "./type";
 
-export class Schema<
-  TR extends TypeRecord,
-  RR extends RelationsRecord<TR>
-> {
+export class Schema<TR extends TypeRecord, RR extends RelationsRecord<TR>> {
   allowedValues = new Set<string>();
 
   constructor(public types: TR, public relations: RR) {
