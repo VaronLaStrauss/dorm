@@ -1,6 +1,6 @@
-import { fragment } from "../fragment";
-import { pred } from "../predicate";
-import type { InferReturn } from "../types";
+import { fragment, type InferReturn } from "../fragment";
+import { pass, pred, type ExtendedPredicates } from "../predicate";
+import { query } from "../query";
 import { User } from "./user";
 
 const userFrag = fragment(
@@ -9,11 +9,11 @@ const userFrag = fragment(
     uid: pred("id"),
     employeeCode: true,
     name: true,
+    password: pass("$pass1"),
     audits: {
       opts: pred("userAudits"),
       predicates: {
         user: {
-          // name: true,
           predicates: {
             name: pred("userName"),
           },
@@ -24,4 +24,14 @@ const userFrag = fragment(
   true
 );
 
+console.log(userFrag.fragmentStr);
+
+type UserFrag = ExtendedPredicates<typeof User>;
 type SampleReturnType = InferReturn<typeof User, (typeof userFrag)["fragment"]>;
+
+const userQuery = {
+  user: query({
+    mainFunc: { field: "", op: "eq", value: "" },
+    fragOpts: userFrag,
+  }),
+};

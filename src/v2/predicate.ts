@@ -1,5 +1,6 @@
 import type { StringIndex, DateTimeIndex } from "./indexes";
-import type { InitOpts } from "./types";
+import type { DNode, DNodeExtended } from "./node";
+import type { InitOpts, UnionToIntersection } from "./types";
 
 export enum PredicateType {
   STRING = "string",
@@ -93,3 +94,21 @@ export function pred<alias extends string | undefined>(
 }
 
 export type PredOpt = ReturnType<typeof pred>;
+
+export function pass<alias extends string | undefined>(
+  pwdVar: string,
+  alias: alias = undefined as alias,
+  asVar?: string,
+  custom?: string
+) {
+  return { pwdVar, alias, asVar, custom };
+}
+
+export type PassOpt = ReturnType<typeof pass>;
+
+export type ExtendedPredicates<DN extends DNode | DNodeExtended> =
+  DN extends DNodeExtended
+    ? UnionToIntersection<
+        DN["predicates"] & ExtendedPredicates<DN["extendedNodes"][number]>
+      >
+    : DN["predicates"];
