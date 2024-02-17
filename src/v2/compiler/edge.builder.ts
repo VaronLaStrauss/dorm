@@ -24,12 +24,10 @@ export function buildEdge(
     "pwdVar" in opts
   ) {
     const { alias, asVar, pwdVar } = opts as PassOpt;
-    if (!pwdVar.toLowerCase().startsWith("$pass"))
-      throw new Error("Password vars must start with $pass");
     const checkPwd = `checkpwd(${node.name}.${predName}, ${pwdVar})`;
     usedVars.set(pwdVar, undefined);
     const _asVar = compileAsVar(asVar, allowedValues);
-    return `${_space}${alias ?? predName}:${_asVar ?? " "}${checkPwd}`;
+    return `${_space}${alias ?? predName}:${_asVar}${checkPwd}`;
   }
 
   if (typeof opts === "boolean")
@@ -54,7 +52,7 @@ export function buildStatic(
 
   const { alias, asVar } = opts;
   const _asVar = compileAsVar(asVar, allowedValues);
-  return `${_space}${alias ?? predName}: ${_asVar}${edgeName}`;
+  return `${_space}${alias ?? predName}:${_asVar}${edgeName}`;
 }
 
 export function parseStaticPred(predName: "uid" | "dtype") {
