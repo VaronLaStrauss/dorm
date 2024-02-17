@@ -1,7 +1,8 @@
+import { queryBlock } from "../query-block";
 import { fragment, type InferFragment } from "../fragment";
 import { mutate } from "../mutation";
 import { pass, pred } from "../predicate";
-import { queryBlock, query } from "../query";
+import { query } from "../query";
 import {
   recurseFragment,
   type InferRecurseFragment,
