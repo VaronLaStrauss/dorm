@@ -30,7 +30,7 @@ export function reverse<
   return { predName };
 }
 
-export type Reverse = ReturnType<typeof reverse>;
+export type Reverse<DN extends DNode> = ReturnType<typeof reverse<DN>>;
 
 export function forward() {
   return { forward: true } as const;
@@ -40,7 +40,7 @@ export type Forward = ReturnType<typeof forward>;
 
 export class DPredicateNode<
   NextDN extends DNode,
-  Rel extends Reverse | Forward = Forward | Reverse,
+  Rel extends Reverse<NextDN> | Forward = Forward | Reverse<NextDN>,
   Opts extends InitOpts = InitOpts
 > {
   constructor(
@@ -52,7 +52,7 @@ export class DPredicateNode<
 
 export function predicateNode<
   NextDN extends DNode,
-  Rel extends Reverse | Forward = Forward | Reverse,
+  Rel extends Reverse<NextDN> | Forward = Forward | Reverse<NextDN>,
   Opts extends InitOpts = InitOpts
 >(node: NextDN, relation: Rel, opts: Opts = {} as Opts) {
   return new DPredicateNode<NextDN, Rel, Opts>(node, relation, opts);

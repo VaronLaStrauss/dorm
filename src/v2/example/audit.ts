@@ -1,9 +1,9 @@
 import { node } from "../node";
 import { forward, predicateNode, reverse } from "../predicate";
 import { Content } from "./contact";
-import { Human, User } from "./user";
+import { User } from "./user";
 
 export const Audit = node("Audit", {
-  user: () => predicateNode(Human, reverse<typeof User>("audits")),
+  user: () => predicateNode(User, reverse("audits")),
   content: () => predicateNode(Content, forward()),
 });
