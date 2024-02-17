@@ -1,5 +1,5 @@
 import { edge } from "../edge";
-import { node, predicateNode, relation } from "../node";
+import { forward, node, predicateNode } from "../node";
 import { PredicateType } from "../predicate";
 import { Audit } from "./audit";
 
@@ -8,7 +8,7 @@ export const Human = node("Human", {
 });
 
 export const Employee = node("Employee", {
-  audits: () => predicateNode(Audit, relation(true), { asArray: true }),
+  audits: () => predicateNode(Audit, forward(), { asArray: true }),
   employeeCode: edge({ type: PredicateType.STRING }),
 });
 
