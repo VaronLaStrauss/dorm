@@ -8,6 +8,12 @@ export function edge<Opts extends EdgeInit>(opts: Opts) {
   return new DEdge(opts);
 }
 
+export function from<T extends Array<string | number>>(keys: [...T]) {
+  return keys.reduce((acc, curr) => {
+    return { ...acc, [curr + ""]: curr };
+  }, {} as { [key in T[number]]: key });
+}
+
 export type GeoType<GeoKey extends (typeof GoGeomTypes)[number]> = {
   type: GeoKey;
   coordinates: InferGeo<GeoKey>;
@@ -24,19 +30,19 @@ export type InferGeo<Geo extends (typeof GoGeomTypes)[number]> =
 
 export type InferEdge<Opts extends DEdge<EdgeInit>["opts"]> =
   Opts extends StringEdge
-    ? Opts["fromValues"] extends Array<infer U>
+    ? Opts["allowedValues"] extends Record<string, infer U>
       ? U
       : string
     : Opts extends BoolEdge
     ? boolean
     : Opts extends DateTimeEdge
     ? Date
-    : Opts extends FloatEdge
-    ? number
+    : Opts extends FloatEdge | IntEdge
+    ? Opts["allowedValues"] extends Record<number, infer U>
+      ? U
+      : number
     : Opts extends GeoEdge
     ? GeoType<Opts["geoType"]>
-    : Opts extends IntEdge
-    ? number
     : Opts extends PasswordEdge
     ? boolean
     : string[];
@@ -51,14 +57,15 @@ export enum EdgeType {
   PASSWORD = "password",
 }
 
-export type Edge =
-  | PasswordEdge
+export type IndexableEdge =
   | IntEdge
   | FloatEdge
   | BoolEdge
   | GeoEdge
   | DateTimeEdge
   | StringEdge;
+
+export type Edge = IndexableEdge | PasswordEdge;
 
 export type EdgeInit = {
   count?: true;
@@ -69,7 +76,7 @@ export type EdgeInit = {
 export type StringEdge = {
   indexes?: (keyof typeof StringIndex)[];
   type: EdgeType.STRING;
-  fromValues?: ReadonlyArray<string>;
+  allowedValues?: Record<string, string>;
 };
 
 export type DateTimeEdge = {
@@ -84,11 +91,13 @@ export type PasswordEdge = {
 export type IntEdge = {
   indexes?: true;
   type: EdgeType.INT;
+  allowedValues?: Record<number, number>;
 };
 
 export type FloatEdge = {
   indexes?: true;
   type: EdgeType.FLOAT;
+  allowedValues?: Record<number, number>;
 };
 
 export type BoolEdge = {

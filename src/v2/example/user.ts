@@ -1,15 +1,23 @@
-import { EdgeType, edge } from "../edge";
+import { EdgeType, edge, from } from "../edge";
 import { node } from "../node";
 import { forward, predicateNode } from "../predicate";
 import { Audit } from "./audit";
 
 export const Human = node("Human", {
-  name: edge({ type: EdgeType.STRING, nullable: true, asArray: true }),
+  name: edge({
+    type: EdgeType.STRING,
+    nullable: true,
+    asArray: true,
+    indexes: ["hash"],
+  }),
 });
+
+const UserActive = from([1, 2, 3]);
 
 export const Employee = node("Employee", {
   audits: () => predicateNode(Audit, forward(), { asArray: true }),
   employeeCode: edge({ type: EdgeType.STRING }),
+  active: edge({ type: EdgeType.FLOAT, allowedValues: UserActive }),
 });
 
 export const User = node("User", {

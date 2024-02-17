@@ -7,6 +7,7 @@ import {
   type InferRecurseFragment,
   recurse,
 } from "../recurse";
+import { filterablePreds } from "../utils/filter";
 import { Audit } from "./audit";
 import { Content } from "./contact";
 import { User } from "./user";
@@ -19,6 +20,7 @@ const userFrag = fragment(
     uid: pred("id"),
     employeeCode: true,
     name: true,
+    active: true,
     password: pass("$pass1"),
     audits: {
       opts: pred("userAudits"),
@@ -82,11 +84,20 @@ const queries = queryBlock({
 
 console.log(queries.query);
 
-console.log("\n----- MUTATION -----");
+console.log("\n----- MUTATION -----\n");
 
 const mut = mutate(User, {
   password: "waw",
   audits: [{ content: { detail: "waw" } }],
+  active: 1,
 });
 
-console.log(JSON.stringify(mut, undefined, 4));
+console.log(JSON.stringify(mut, undefined, 2));
+
+console.log("\n----- FILTERABLES -----\n");
+
+const filterables = filterablePreds(User, {
+  name: { label: "waw" },
+  audits: { label: "x" },
+});
+console.log(JSON.stringify(filterables, undefined, 2));
