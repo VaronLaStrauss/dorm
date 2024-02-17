@@ -1,16 +1,16 @@
-import { compileDirectives, compileMainFunc } from "./compiler";
+import { compileDirectives, compileMainFunc } from "./compiler/filter.compiler";
 import { buildRecurse, compileRecurse } from "./compiler/recurse.builder";
-import type { DEdge, EdgeInit, InferEdge } from "./edge";
+import type { DEdge, EdgeInit, EdgeType, InferEdge } from "./edge";
 import type { FilterEdge, FilterFull, RecurseOpts } from "./filter";
 import type { ExpoundPred } from "./fragment";
-import { DNode, type DPredicateNode } from "./node";
+import { DNode } from "./node";
 import type {
+  DPredicateNode,
   ExtendedPredicates,
   PassOpt,
   PredOpt,
-  PredicateType,
 } from "./predicate";
-import type { Flatten, UnionToIntersection } from "./types";
+import type { Flatten, UnionToIntersection } from "./utils/types";
 import { spacing } from "./utils/spacing";
 
 export function recurse<
@@ -152,7 +152,7 @@ export type RecurseFragment<
       ? NextRecurseFragment
       : never
     : EP[predName] extends DEdge<infer Opts>
-    ? Opts["type"] extends PredicateType.PASSWORD
+    ? Opts["type"] extends EdgeType.PASSWORD
       ? PassOpt
       : boolean | PredOpt
     : never;

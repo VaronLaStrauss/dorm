@@ -1,4 +1,5 @@
-import { forward, node, predicateNode, reverse } from "../node";
+import { node } from "../node";
+import { forward, predicateNode, reverse } from "../predicate";
 import { Content } from "./contact";
 import { Human, User } from "./user";
 

@@ -1,14 +1,4 @@
-import type { DateTimeIndex, StringIndex } from "./indexes";
-import type {
-  BoolPredicate,
-  DateTimePredicate,
-  FloatPredicate,
-  GeoPredicate,
-  IntPredicate,
-  PasswordPredicate,
-  PredicateType,
-  StringPredicate,
-} from "./predicate";
+import type { DateTimeIndex, StringIndex } from "./utils/indexes";
 
 export class DEdge<Opts extends EdgeInit> {
   constructor(public readonly opts: Opts) {}
@@ -33,24 +23,22 @@ export type InferGeo<Geo extends (typeof GoGeomTypes)[number]> =
     : GeoType<(typeof GoGeomTypes)[number]>;
 
 export type InferEdge<Opts extends DEdge<EdgeInit>["opts"]> =
-  Opts extends StringPredicate
+  Opts extends StringEdge
     ? Opts["fromValues"] extends Array<infer U>
       ? U
       : string
-    : Opts extends BoolPredicate
+    : Opts extends BoolEdge
     ? boolean
-    : Opts extends DateTimePredicate
+    : Opts extends DateTimeEdge
     ? Date
-    : Opts extends FloatPredicate
+    : Opts extends FloatEdge
     ? number
-    : Opts extends GeoPredicate
+    : Opts extends GeoEdge
     ? GeoType<Opts["geoType"]>
-    : Opts extends IntPredicate
+    : Opts extends IntEdge
     ? number
-    : Opts extends PasswordPredicate
+    : Opts extends PasswordEdge
     ? boolean
-    : Opts["type"] extends PredicateType.UID
-    ? string
     : string[];
 
 export enum EdgeType {
@@ -61,8 +49,6 @@ export enum EdgeType {
   GEO = "geo",
   DATETIME = "dateTime",
   PASSWORD = "password",
-  UID = "uid",
-  TYPE = "dgraph.type",
 }
 
 export type Edge =
@@ -72,8 +58,7 @@ export type Edge =
   | BoolEdge
   | GeoEdge
   | DateTimeEdge
-  | StringEdge
-  | StaticEdge;
+  | StringEdge;
 
 export type EdgeInit = {
   count?: true;
@@ -81,38 +66,34 @@ export type EdgeInit = {
   asArray?: true;
 } & Edge;
 
-export type StaticEdge = {
-  type: PredicateType.UID | PredicateType.TYPE;
-};
-
 export type StringEdge = {
   indexes?: (keyof typeof StringIndex)[];
-  type: PredicateType.STRING;
+  type: EdgeType.STRING;
   fromValues?: ReadonlyArray<string>;
 };
 
 export type DateTimeEdge = {
   indexes?: (keyof typeof DateTimeIndex)[];
-  type: PredicateType.DATETIME;
+  type: EdgeType.DATETIME;
 };
 
 export type PasswordEdge = {
-  type: PredicateType.PASSWORD;
+  type: EdgeType.PASSWORD;
 };
 
 export type IntEdge = {
   indexes?: true;
-  type: PredicateType.INT;
+  type: EdgeType.INT;
 };
 
 export type FloatEdge = {
   indexes?: true;
-  type: PredicateType.FLOAT;
+  type: EdgeType.FLOAT;
 };
 
 export type BoolEdge = {
   indexes?: true;
-  type: PredicateType.BOOL;
+  type: EdgeType.BOOL;
 };
 
 export const GoGeomTypes = [
@@ -127,7 +108,7 @@ export const GoGeomTypes = [
 
 export type GeoEdge = {
   indexes?: true;
-  type: PredicateType.GEO;
+  type: EdgeType.GEO;
   geoType: (typeof GoGeomTypes)[number];
 };
 
@@ -136,7 +117,3 @@ export type PredFragmentOpt<A extends string = string> = {
   alias?: A;
   asVar?: string;
 };
-
-export function pred<PO extends PredFragmentOpt>(opts: PO) {
-  return opts;
-}

@@ -1,8 +1,7 @@
-import type { PredicateType } from "..";
-import type { DEdge, InferEdge } from "./edge";
-import type { DNode, DPredicateNode, Forward } from "./node";
-import type { ExtendedPredicates } from "./predicate";
-import type { Flatten, NullableType, UnionToIntersection } from "./types";
+import type { DEdge, EdgeType, InferEdge } from "./edge";
+import type { DNode } from "./node";
+import type { DPredicateNode, ExtendedPredicates, Forward } from "./predicate";
+import type { Flatten, NullableType, UnionToIntersection } from "./utils/types";
 
 export function mutate<DN extends DNode>(
   node: DN,
@@ -58,7 +57,7 @@ export type MutationFields<
   UnionToIntersection<
     {
       [key in keyof EP]?: EP[key] extends DEdge<infer Opts>
-        ? Opts["type"] extends PredicateType.PASSWORD
+        ? Opts["type"] extends EdgeType.PASSWORD
           ? string | null | undefined
           : NullableType<Opts, InferEdge<Opts>> | null
         : EP[key] extends () => DPredicateNode<

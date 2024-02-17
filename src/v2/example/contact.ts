@@ -1,7 +1,6 @@
-import { edge } from "../edge";
+import { EdgeType, edge } from "../edge";
 import { node } from "../node";
-import { PredicateType } from "../predicate";
 
 export const Content = node("Content", {
-  detail: edge({ type: PredicateType.STRING }),
+  detail: edge({ type: EdgeType.STRING }),
 });

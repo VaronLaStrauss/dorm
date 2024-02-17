@@ -1,4 +1,4 @@
-import type { ZeroValIndex, OneValIndex, TwoValIndex } from "./indexes";
+import type { ZeroValIndex, OneValIndex, TwoValIndex } from "./utils/indexes";
 
 export type FilterEdge =
   | { op: keyof typeof ZeroValIndex; value: string }

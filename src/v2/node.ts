@@ -1,7 +1,6 @@
 import { predToNode, type PredToNode } from "./compiler/pred-to-node";
 import type { DEdge } from "./edge";
-import type { ExtendedPredicates } from "./predicate";
-import type { InitOpts } from "./types";
+import type { DPredicateNode } from "./predicate";
 
 export type NodePredicate =
   // @ts-expect-error: DEdge is kept like this because error expected to allow for recursive types on typescript@5.3.3
@@ -98,40 +97,4 @@ export function node<name extends string, NPR extends NodePredicateRecord>(
   predicates: NPR
 ) {
   return new DNode(name, predicates);
-}
-
-export function reverse<
-  DN extends DNode,
-  EP extends ExtendedPredicates<DN> = ExtendedPredicates<DN>,
-  predName extends keyof EP & string = keyof EP & string
->(predName: predName) {
-  return { predName };
-}
-
-export type Reverse = ReturnType<typeof reverse>;
-
-export function forward() {
-  return { forward: true } as const;
-}
-
-export type Forward = ReturnType<typeof forward>;
-
-export class DPredicateNode<
-  NextDN extends DNode,
-  Rel extends Reverse | Forward = Forward | Reverse,
-  Opts extends InitOpts = InitOpts
-> {
-  constructor(
-    public readonly nextNode: NextDN,
-    public readonly relation: Rel,
-    public readonly opts: Opts = {} as Opts
-  ) {}
-}
-
-export function predicateNode<
-  NextDN extends DNode,
-  Rel extends Reverse | Forward = Forward | Reverse,
-  Opts extends InitOpts = InitOpts
->(node: NextDN, relation: Rel, opts: Opts = {} as Opts) {
-  return new DPredicateNode<NextDN, Rel, Opts>(node, relation, opts);
 }

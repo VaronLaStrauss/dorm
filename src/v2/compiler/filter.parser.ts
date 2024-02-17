@@ -1,5 +1,5 @@
 import { v4 } from "uuid";
-import { AllIndexes } from "../indexes";
+import { AllIndexes } from "../utils/indexes";
 import type { FilterEdge } from "../filter";
 
 export function parseFilter(

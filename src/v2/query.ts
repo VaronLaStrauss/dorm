@@ -1,4 +1,5 @@
-import { compileDirectives, compileMainFunc, parseDqlType } from "./compiler";
+import { parseDqlType } from "./compiler/dql-type.parser";
+import { compileDirectives, compileMainFunc } from "./compiler/filter.compiler";
 import type { FilterEdge, FilterFull } from "./filter";
 import type { Fragment, FragmentReturn } from "./fragment";
 import type { DNode } from "./node";

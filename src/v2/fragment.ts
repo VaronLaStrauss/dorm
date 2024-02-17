@@ -1,13 +1,13 @@
-import type { NullableType } from "./types";
-import type { DEdge, EdgeInit, InferEdge } from "./edge";
-import type { DNode, DPredicateNode } from "./node";
+import type { NullableType } from "./utils/types";
+import type { DEdge, EdgeInit, EdgeType, InferEdge } from "./edge";
+import type { DNode } from "./node";
 import type {
+  DPredicateNode,
   ExtendedPredicates,
   PassOpt,
   PredOpt,
-  PredicateType,
 } from "./predicate";
-import type { Flatten, InitOpts, UnionToIntersection } from "./types";
+import type { Flatten, InitOpts, UnionToIntersection } from "./utils/types";
 import type { FilterFull } from "./filter";
 import { buildFragment } from "./compiler/fragment.builder";
 
@@ -56,7 +56,7 @@ export type Fragment<
       ? NextFragment<NextDN>
       : never
     : EP[predName] extends DEdge<infer Opts>
-    ? Opts["type"] extends PredicateType.PASSWORD
+    ? Opts["type"] extends EdgeType.PASSWORD
       ? PassOpt
       : boolean | PredOpt
     : never;

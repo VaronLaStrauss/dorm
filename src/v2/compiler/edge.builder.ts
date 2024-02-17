@@ -1,7 +1,7 @@
 import { compileAsVar } from "./filter.compiler";
-import { PredicateType, type PassOpt, type PredOpt } from "../predicate";
+import { type PassOpt, type PredOpt } from "../predicate";
 import { spacing } from "../utils/spacing";
-import type { DEdge, EdgeInit } from "../edge";
+import { EdgeType, type DEdge, type EdgeInit } from "../edge";
 import type { DNode } from "../node";
 
 export function buildEdge(
@@ -19,7 +19,7 @@ export function buildEdge(
     return `${_space}${predName}: ${node.name}.${predName}`;
 
   if (
-    edge.opts.type === PredicateType.PASSWORD &&
+    edge.opts.type === EdgeType.PASSWORD &&
     typeof opts === "object" &&
     "pwdVar" in opts
   ) {
