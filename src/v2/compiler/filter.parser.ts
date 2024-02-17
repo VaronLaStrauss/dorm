@@ -25,10 +25,13 @@ export function parseFilter(
     return `${filter.op}(${filter.value})`;
   }
 
-  if (!("field" in filter) || !allowedValues.has(filter.field))
+  if (!("field" in filter) || !allowedValues.has(filter.field)) {
     throw new Error(
-      "Cannot parse because the value is either missing or is unsafe"
+      `Cannot parse ${String(
+        "field" in filter ? filter.field : "current filter field"
+      )} because the field is either undefined or is unsafe`
     );
+  }
 
   if ("values" in filter) {
     const var1 = parseFilterValue(filter.values[0], usedVars, allowedValues);
