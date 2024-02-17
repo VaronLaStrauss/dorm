@@ -1,7 +1,5 @@
-import type { FilterFull, RecurseOpts } from "../filter";
-import type { Fragment } from "../fragment";
-import type { DNode } from "../node";
-import type { Query } from "../query";
+import type { FilterFull } from "../filter";
+import type { QueryOpts } from "../query";
 import { parseFilter } from "./filter.parser";
 
 export type FilterReturn = { node: string; usedVars: Set<string> };
@@ -27,7 +25,7 @@ export function compileDirectives(
 }
 
 export function compileMainFunc(
-  { mainFunc, order, page }: Query<DNode, Fragment<DNode>>,
+  { mainFunc, order, page }: QueryOpts,
   usedVars: Map<string, unknown>,
   allowedValues: Set<string>
 ) {
@@ -103,12 +101,6 @@ export function compileOrder(
     _orders.push(`order${order.format ?? "asc"}: ${order.field}`);
   }
   return _orders.join(", ");
-}
-
-export function compileRecurse(opts: RecurseOpts) {
-  return typeof opts === "boolean"
-    ? `@recurse`
-    : `@recurse(loop: ${opts.loop}, depth: ${opts.depth})`;
 }
 
 export function compileAsVar(asVar?: string, allowedValues?: Set<string>) {
