@@ -1,11 +1,11 @@
 import type { RecurseOpts } from "../filter";
 import type { DNode, DPredicateNode } from "../node";
-import type { RecurseFragment, NextRecurseFragment } from "../recurse";
+import type { NextRecurseFragment, RecurseFragment } from "../recurse";
 import { spacing } from "../utils/spacing";
-import { buildStatic, buildEdge } from "./edge.builder";
+import { buildEdge, buildStatic } from "./edge.builder";
 import { compileDirectives } from "./filter.compiler";
 import { forwardReverseNode } from "./node.builder";
-import { predToNode, type PredToNode } from "./pred-to-node";
+import { type PredToNode } from "./pred-to-node";
 
 export function buildRecurse<MainDN extends DNode, DNs extends DNode[]>(
   mainNode: MainDN,
