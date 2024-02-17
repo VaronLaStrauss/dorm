@@ -1,66 +1,8 @@
-import { compileAsVar, compileDirectives } from "./filter.compiler";
 import type { Fragment, NextFragment } from "../fragment";
 import type { DNode, DPredicateNode } from "../node";
-import { buildEdge, buildStatic } from "./edge.builder";
-import { spacing } from "../..";
-
-export function build<DN extends DNode, F extends Fragment<DN>>(
-  node: DN,
-  fragment: F,
-  usedVars: Map<string, unknown>,
-  allowedValues: Set<string>,
-  level = 1
-): string {
-  const predToNode = node.getPredToNode();
-  const inners: string[] = [];
-
-  for (const predName in fragment) {
-    const opts = fragment[predName];
-    if (!opts) continue;
-
-    if (predName === "uid" || predName === "dtype") {
-      const inner = buildStatic(
-        predName as Parameters<typeof buildStatic>[0],
-        opts,
-        allowedValues,
-        level
-      );
-      inners.push(inner);
-      continue;
-    }
-
-    const currentNode = predToNode[predName];
-    const pred = currentNode.predicates[predName];
-
-    if (typeof pred === "function") {
-      const nextPredNode = pred() as DPredicateNode<DNode>;
-      const inner = buildNode(
-        currentNode,
-        nextPredNode,
-        predName,
-        opts as NextFragment<DNode>,
-        usedVars,
-        allowedValues,
-        level
-      );
-      inners.push(inner);
-      continue;
-    }
-
-    const inner = buildEdge(
-      predName,
-      pred,
-      node,
-      opts,
-      usedVars,
-      allowedValues,
-      level
-    );
-    inners.push(inner);
-  }
-
-  return inners.join("\n");
-}
+import { spacing } from "../utils/spacing";
+import { compileAsVar, compileDirectives } from "./filter.compiler";
+import { buildFragment } from "./fragment.builder";
 
 export function buildNode(
   currentNode: DNode,
@@ -74,7 +16,7 @@ export function buildNode(
   const _space = spacing(level);
   const { cascade, filter, opts, order, page, predicates } = nextFragment;
 
-  const relationStr = forwardReverseType(
+  const relationStr = forwardReverseNode(
     currentNode,
     nextPredNode,
     predName,
@@ -89,7 +31,7 @@ export function buildNode(
     allowedValues
   );
 
-  const inner = build(
+  const inner = buildFragment(
     nextPredNode.nextNode,
     predicates as Fragment<DNode>,
     usedVars,
@@ -100,7 +42,7 @@ export function buildNode(
   return `${_space}${relationStr} ${directives} {\n${inner}\n${_space}}`;
 }
 
-export function forwardReverseType(
+export function forwardReverseNode(
   currentNode: DNode,
   nextPredNode: DPredicateNode<DNode>,
   predName: string,
@@ -110,9 +52,9 @@ export function forwardReverseType(
 ) {
   const nodeName = currentNode.name;
   const { relation } = nextPredNode;
-  let type = `${alias ?? predName}: `;
-  if (typeof relation === "boolean") type += `${nodeName}.${predName}`;
-  else type += `~${nextPredNode.nextNode.name}.${relation}`;
+  let type = "";
+  if ("forward" in relation) type += `${nodeName}.${predName}`;
+  else type += `~${nextPredNode.nextNode.name}.${relation.predName}`;
   if (asVar) type = `${compileAsVar(asVar, allowedValues)}${type}`;
-  return type;
+  return `${alias ?? predName}: ${type}`;
 }
