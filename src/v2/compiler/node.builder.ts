@@ -1,5 +1,6 @@
 import type { Fragment, NextFragment } from "../fragment";
-import type { DNode, DPredicateNode } from "../node";
+import type { DNode } from "../node";
+import type { DPredicateNode } from "../predicate";
 import { spacing } from "../utils/spacing";
 import { compileAsVar, compileDirectives } from "./filter.compiler";
 import { buildFragment } from "./fragment.builder";

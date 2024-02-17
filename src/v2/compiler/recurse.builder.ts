@@ -1,5 +1,6 @@
 import type { RecurseOpts } from "../filter";
-import type { DNode, DPredicateNode } from "../node";
+import type { DNode } from "../node";
+import type { DPredicateNode } from "../predicate";
 import type { NextRecurseFragment, RecurseFragment } from "../recurse";
 import { spacing } from "../utils/spacing";
 import { buildEdge, buildStatic } from "./edge.builder";
