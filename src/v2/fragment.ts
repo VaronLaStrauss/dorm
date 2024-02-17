@@ -9,21 +9,27 @@ import type {
 } from "./predicate";
 import type { Flatten, InitOpts, UnionToIntersection } from "./types";
 import type { FilterFull } from "./filter";
+import { buildFragment } from "./compiler/fragment.builder";
 
 export type FragmentReturn<DN extends DNode, F extends Fragment<DN>> = {
   fragment: F;
   build: () => string;
-  type: InferReturn<DN, F>;
+  type: InferFragment<DN, F>;
   fragmentStr?: string;
+  usedVars: Map<string, unknown>;
+  allowedValues: Set<string>;
 };
 
-export function fragment<
-  DN extends DNode,
-  F extends Fragment<DN>,
-  _build extends boolean
->(node: DN, fragment: F, buildNow = true): FragmentReturn<DN, F> {
+export function fragment<DN extends DNode, F extends Fragment<DN>>(
+  node: DN,
+  fragment: F,
+  buildNow = true
+): FragmentReturn<DN, F> {
+  const usedVars = new Map<string, unknown>();
+  const allowedValues = new Set<string>([...node.getAllowedValues()]);
+
   function build() {
-    return node.build(fragment);
+    return buildFragment(node, fragment, usedVars, allowedValues, 2);
   }
 
   return {
@@ -31,6 +37,8 @@ export function fragment<
     fragment,
     type: undefined as never,
     fragmentStr: buildNow ? build() : undefined,
+    usedVars,
+    allowedValues,
   };
 }
 
@@ -54,7 +62,7 @@ export type Fragment<
     : never;
 } & Partial<{ uid: boolean | PredOpt; dtype: boolean | PredOpt }>;
 
-export type InferReturn<
+export type InferFragment<
   DN extends DNode,
   QF extends Fragment<DN>,
   EP extends ExtendedPredicates<DN> = ExtendedPredicates<DN>
@@ -80,7 +88,7 @@ export type InferReturn<
                 QF[key]["opts"],
                 ReturnType<EP[key]>["opts"],
                 key,
-                InferReturn<NextDN, QF[key]["predicates"]>
+                InferFragment<NextDN, QF[key]["predicates"]>
               >
             : never
           : never
@@ -93,7 +101,7 @@ export type InferReturn<
   >
 >;
 
-type ExpoundPred<
+export type ExpoundPred<
   PO extends PredOpt | boolean | undefined,
   Opts extends InitOpts | undefined,
   key extends string | number | symbol,
@@ -112,11 +120,11 @@ type ExpoundPred<
     : { [k in key]: NullableType<Opts, V> }
   : { [k in key]: V };
 
-type ExpoundStaticValue<key extends "uid" | "dtype"> = key extends "uid"
+export type ExpoundStaticValue<key extends "uid" | "dtype"> = key extends "uid"
   ? string
   : string[];
 
-type ExpoundStatic<
+export type ExpoundStatic<
   PO extends PredOpt | boolean,
   key extends "uid" | "dtype"
 > = PO extends PredOpt
