@@ -10,7 +10,7 @@ import type {
   PassOpt,
   PredOpt,
 } from "./predicate";
-import type { Flatten, UnionToIntersection } from "./utils/types";
+import type { Flatten, NullableType, UnionToIntersection } from "./utils/types";
 import { spacing } from "./utils/spacing";
 
 export function recurse<
@@ -100,22 +100,43 @@ export type InferRecurseFragment<
               key,
               InferEdge<EP[key]["opts"]>
             >
-          : EP[key] extends () => DPredicateNode<infer NextDN>
+          : EP[key] extends () => DPredicateNode<
+              infer NextDN,
+              infer _,
+              infer Opts
+            >
           ? NextDN extends DNs[number]
             ? RF[key] extends {
                 opts: PredOpt;
               } & FilterFull
-              ? RF[key]["opts"]["alias"] extends string
+              ? RF[key]["opts"]["alias"] extends infer alias extends
+                  | string
+                  | number
+                  | symbol
                 ? {
-                    [k in RF[key]["opts"]["alias"]]: InferRecurseFragment<
-                      NextDN,
-                      DNs,
-                      RF
+                    [k in alias]: NullableType<
+                      Opts,
+                      InferRecurseFragment<NextDN, DNs, RF>
                     >;
                   }
-                : { [k in key]: InferRecurseFragment<NextDN, DNs, RF> }
-              : { [k in key]: InferRecurseFragment<NextDN, DNs, RF> }
-            : { [k in key]: InferRecurseFragment<NextDN, DNs, RF> }
+                : {
+                    [k in key]: NullableType<
+                      Opts,
+                      InferRecurseFragment<NextDN, DNs, RF>
+                    >;
+                  }
+              : {
+                  [k in key]: NullableType<
+                    Opts,
+                    InferRecurseFragment<NextDN, DNs, RF>
+                  >;
+                }
+            : {
+                [k in key]: NullableType<
+                  Opts,
+                  InferRecurseFragment<NextDN, DNs, RF>
+                >;
+              }
           : never
         : never;
     }[keyof RF]
