@@ -109,32 +109,29 @@ export type InferRecurseFragment<
             ? RF[key] extends {
                 opts: PredOpt;
               } & FilterFull
-              ? RF[key]["opts"]["alias"] extends infer alias extends
-                  | string
-                  | number
-                  | symbol
+              ? RF[key]["opts"]["alias"] extends string
                 ? {
-                    [k in alias]: NullableType<
+                    [k in RF[key]["opts"]["alias"]]: NullableType<
                       Opts,
-                      NullableType<Opts, InferRecurseFragment<NextDN, DNs, RF>>
+                      InferRecurseFragment<NextDN, DNs, RF>
                     >;
                   }
                 : {
                     [k in key]: NullableType<
                       Opts,
-                      NullableType<Opts, InferRecurseFragment<NextDN, DNs, RF>>
+                      InferRecurseFragment<NextDN, DNs, RF>
                     >;
                   }
               : {
                   [k in key]: NullableType<
                     Opts,
-                    NullableType<Opts, InferRecurseFragment<NextDN, DNs, RF>>
+                    InferRecurseFragment<NextDN, DNs, RF>
                   >;
                 }
             : {
                 [k in key]: NullableType<
                   Opts,
-                  NullableType<Opts, InferRecurseFragment<NextDN, DNs, RF>>
+                  InferRecurseFragment<NextDN, DNs, RF>
                 >;
               }
           : never

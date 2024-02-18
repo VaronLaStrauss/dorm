@@ -39,7 +39,7 @@ const userFrag = fragment(
 
 console.log(userFrag.fragmentStr);
 
-type InferUser = InferFragment<typeof User, (typeof userFrag)["fragment"]>;
+type InferUser = typeof userFrag.type;
 
 console.log("\n---- RECURSE -----\n");
 
