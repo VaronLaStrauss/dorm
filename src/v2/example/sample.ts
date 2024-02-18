@@ -59,11 +59,7 @@ const userRecurseFrag = recurseFragment(
 
 console.log(userRecurseFrag.fragmentStr);
 
-type InferUserRecurse = InferRecurseFragment<
-  typeof User,
-  [typeof Audit, typeof User],
-  (typeof userRecurseFrag)["fragment"]
->;
+type InferUserRecurse = typeof userRecurseFrag.type;
 
 console.log("\n---- QUERY -----\n");
 

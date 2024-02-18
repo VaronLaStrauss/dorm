@@ -116,25 +116,25 @@ export type InferRecurseFragment<
                 ? {
                     [k in alias]: NullableType<
                       Opts,
-                      InferRecurseFragment<NextDN, DNs, RF>
+                      NullableType<Opts, InferRecurseFragment<NextDN, DNs, RF>>
                     >;
                   }
                 : {
                     [k in key]: NullableType<
                       Opts,
-                      InferRecurseFragment<NextDN, DNs, RF>
+                      NullableType<Opts, InferRecurseFragment<NextDN, DNs, RF>>
                     >;
                   }
               : {
                   [k in key]: NullableType<
                     Opts,
-                    InferRecurseFragment<NextDN, DNs, RF>
+                    NullableType<Opts, InferRecurseFragment<NextDN, DNs, RF>>
                   >;
                 }
             : {
                 [k in key]: NullableType<
                   Opts,
-                  InferRecurseFragment<NextDN, DNs, RF>
+                  NullableType<Opts, InferRecurseFragment<NextDN, DNs, RF>>
                 >;
               }
           : never
