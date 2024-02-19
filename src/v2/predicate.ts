@@ -1,9 +1,12 @@
 import type { DNode, DNodeExtended } from "./node";
 import type { InitOpts, UnionToIntersection } from "./utils/types";
 
-export function pred<alias extends string | undefined>(
+export function pred<
+  alias extends string | undefined,
+  asVar extends string | undefined
+>(
   alias: alias = undefined as alias,
-  asVar?: string,
+  asVar: asVar = undefined as asVar,
   custom?: string
 ) {
   return { alias, asVar, custom };
@@ -11,10 +14,13 @@ export function pred<alias extends string | undefined>(
 
 export type PredOpt = ReturnType<typeof pred>;
 
-export function pass<alias extends string | undefined>(
+export function pass<
+  alias extends string | undefined,
+  asVar extends string | undefined
+>(
   pwdVar: string,
   alias: alias = undefined as alias,
-  asVar?: string,
+  asVar: asVar = undefined as asVar,
   custom?: string
 ) {
   return { pwdVar, alias, asVar, custom };
