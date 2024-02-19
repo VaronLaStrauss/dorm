@@ -28,24 +28,23 @@ export type InferGeo<Geo extends (typeof GoGeomTypes)[number]> =
     ? [number, number][][]
     : GeoType<(typeof GoGeomTypes)[number]>;
 
-export type InferEdge<Opts extends DEdge<EdgeInit>["opts"]> =
-  Opts extends StringEdge
-    ? Opts["allowedValues"] extends Record<string, infer U>
-      ? U
-      : string
-    : Opts extends BoolEdge
-    ? boolean
-    : Opts extends DateTimeEdge
-    ? Date
-    : Opts extends FloatEdge | IntEdge
-    ? Opts["allowedValues"] extends Record<number, infer U>
-      ? U
-      : number
-    : Opts extends GeoEdge
-    ? GeoType<Opts["geoType"]>
-    : Opts extends PasswordEdge
-    ? boolean
-    : string[];
+export type InferEdge<Opts extends EdgeInit> = Opts extends StringEdge
+  ? Opts["allowedValues"] extends Record<string, infer U>
+    ? U
+    : string
+  : Opts extends BoolEdge
+  ? boolean
+  : Opts extends DateTimeEdge
+  ? Date
+  : Opts extends FloatEdge | IntEdge
+  ? Opts["allowedValues"] extends Record<number, infer U>
+    ? U
+    : number
+  : Opts extends GeoEdge
+  ? GeoType<Opts["geoType"]>
+  : Opts extends PasswordEdge
+  ? boolean
+  : string[];
 
 export enum EdgeType {
   STRING = "string",

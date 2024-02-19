@@ -51,15 +51,15 @@ export type Fragment<
   CurrentDN extends DNode,
   EP extends ExtendedPredicates<CurrentDN> = ExtendedPredicates<CurrentDN>
 > = {
-  [predName in keyof EP]?: EP[predName] extends () => infer U
-    ? U extends PredicateNode<infer NextDN>
-      ? NextFragment<NextDN>
-      : never
+  [predName in keyof EP]?: EP[predName] extends () => PredicateNode<
+    infer NextDN
+  >
+    ? NextFragment<NextDN>
     : EP[predName] extends DEdge<infer Opts>
     ? Opts["type"] extends EdgeType.PASSWORD
       ? PassOpt
       : boolean | PredOpt
-    : never;
+    : boolean | PredOpt;
 } & Partial<{ uid: boolean | PredOpt; dtype: boolean | PredOpt }>;
 
 export type InferFragment<
@@ -79,14 +79,18 @@ export type InferFragment<
                 InferEdge<EP[key]["opts"]>
               >
             : never
-          : EP[key] extends () => PredicateNode<infer NextDN>
+          : EP[key] extends () => PredicateNode<
+              infer NextDN,
+              infer _,
+              infer Opts
+            >
           ? QF[key] extends {
               predicates: Fragment<NextDN>;
               opts?: PredOpt;
-            }
+            } & FilterFull
             ? ExpoundPred<
                 QF[key]["opts"],
-                ReturnType<EP[key]>["opts"],
+                Opts,
                 key,
                 InferFragment<NextDN, QF[key]["predicates"]>
               >

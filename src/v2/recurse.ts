@@ -98,13 +98,8 @@ export type InferRecurseFragment<
   UnionToIntersection<
     {
       [key in keyof RF]: key extends keyof EP
-        ? EP[key] extends DEdge<EdgeInit>
-          ? ExpoundPred<
-              RF[key],
-              EP[key]["opts"],
-              key,
-              InferEdge<EP[key]["opts"]>
-            >
+        ? EP[key] extends DEdge<infer Opts>
+          ? ExpoundPred<RF[key], Opts, key, InferEdge<Opts>>
           : EP[key] extends () => PredicateNode<
               infer NextDN,
               infer _,

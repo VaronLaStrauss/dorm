@@ -32,6 +32,7 @@ const userFrag = fragment(
           },
         },
       },
+      filter: { op: "eq", field: "", value: "" },
     },
   },
   true
