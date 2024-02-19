@@ -1,10 +1,10 @@
 import { predToNode, type PredToNode } from "./compiler/pred-to-node";
 import type { DEdge } from "./edge";
-import type { DPredicateNode } from "./predicate";
+import type { PredicateNode } from "./predicate";
 
 export type NodePredicate =
   // @ts-expect-error: DEdge is kept like this because error expected to allow for recursive types on typescript@5.3.3
-  DEdge | (<T extends DNode>() => DPredicateNode<T>);
+  DEdge | (<T extends DNode>() => PredicateNode<T>);
 
 export interface NodePredicateRecord {
   [key: string]: NodePredicate;

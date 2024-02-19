@@ -2,7 +2,7 @@ import type { NullableType } from "./utils/types";
 import type { DEdge, EdgeInit, EdgeType, InferEdge } from "./edge";
 import type { DNode } from "./node";
 import type {
-  DPredicateNode,
+  PredicateNode,
   ExtendedPredicates,
   PassOpt,
   PredOpt,
@@ -52,7 +52,7 @@ export type Fragment<
   EP extends ExtendedPredicates<CurrentDN> = ExtendedPredicates<CurrentDN>
 > = {
   [predName in keyof EP]?: EP[predName] extends () => infer U
-    ? U extends DPredicateNode<infer NextDN>
+    ? U extends PredicateNode<infer NextDN>
       ? NextFragment<NextDN>
       : never
     : EP[predName] extends DEdge<infer Opts>
@@ -79,7 +79,7 @@ export type InferFragment<
                 InferEdge<EP[key]["opts"]>
               >
             : never
-          : EP[key] extends () => DPredicateNode<infer NextDN>
+          : EP[key] extends () => PredicateNode<infer NextDN>
           ? QF[key] extends {
               predicates: Fragment<NextDN>;
               opts?: PredOpt;

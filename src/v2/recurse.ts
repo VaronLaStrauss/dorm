@@ -5,7 +5,7 @@ import type { FilterEdge, FilterFull, RecurseOpts } from "./filter";
 import type { ExpoundPred } from "./fragment";
 import { DNode } from "./node";
 import type {
-  DPredicateNode,
+  PredicateNode,
   ExtendedPredicates,
   PassOpt,
   PredOpt,
@@ -100,7 +100,7 @@ export type InferRecurseFragment<
               key,
               InferEdge<EP[key]["opts"]>
             >
-          : EP[key] extends () => DPredicateNode<
+          : EP[key] extends () => PredicateNode<
               infer NextDN,
               infer _,
               infer Opts
@@ -166,7 +166,7 @@ export type RecurseFragment<
   EP extends ExtendedPredicates<CurrentDN> = ExtendedPredicates<CurrentDN>
 > = {
   [predName in keyof EP]?: EP[predName] extends () => infer U
-    ? U extends DPredicateNode<DNode>
+    ? U extends PredicateNode<DNode>
       ? NextRecurseFragment
       : never
     : EP[predName] extends DEdge<infer Opts>

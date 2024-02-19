@@ -38,25 +38,19 @@ export function forward() {
 
 export type Forward = ReturnType<typeof forward>;
 
-export class DPredicateNode<
-  NextDN extends DNode,
-  Rel extends Reverse<NextDN> | Forward = Forward | Reverse<NextDN>,
-  Opts extends InitOpts = InitOpts
-> {
-  constructor(
-    public readonly nextNode: NextDN,
-    public readonly relation: Rel,
-    public readonly opts: Opts = {} as Opts
-  ) {}
-}
-
 export function predicateNode<
   NextDN extends DNode,
   Rel extends Reverse<NextDN> | Forward = Forward | Reverse<NextDN>,
   Opts extends InitOpts = InitOpts
->(node: NextDN, relation: Rel, opts: Opts = {} as Opts) {
-  return new DPredicateNode<NextDN, Rel, Opts>(node, relation, opts);
+>(nextNode: NextDN, relation: Rel, opts: Opts = {} as Opts) {
+  return { nextNode, relation, opts };
 }
+
+export type PredicateNode<
+  NextDN extends DNode,
+  Rel extends Reverse<NextDN> | Forward = Forward | Reverse<NextDN>,
+  Opts extends InitOpts = InitOpts
+> = ReturnType<typeof predicateNode<NextDN, Rel, Opts>>;
 
 export type ExtendedPredicates<DN extends DNode | DNodeExtended> =
   DN extends DNodeExtended

@@ -1,6 +1,6 @@
 import type { Fragment, NextFragment } from "../fragment";
 import type { DNode } from "../node";
-import type { DPredicateNode } from "../predicate";
+import type { PredicateNode } from "../predicate";
 import { buildStatic, buildEdge } from "./edge.builder";
 import { buildNode } from "./node.builder";
 
@@ -34,7 +34,7 @@ export function buildFragment<DN extends DNode, F extends Fragment<DN>>(
     const pred = predicates[predName];
 
     if (typeof pred === "function") {
-      const nextPredNode = pred() as DPredicateNode<DNode>;
+      const nextPredNode = pred() as PredicateNode<DNode>;
       for (const allowedValue of nextPredNode.nextNode.getAllowedValues())
         allowedValues.add(allowedValue);
 

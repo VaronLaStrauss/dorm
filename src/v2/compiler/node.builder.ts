@@ -1,13 +1,13 @@
 import type { Fragment, NextFragment } from "../fragment";
 import type { DNode } from "../node";
-import type { DPredicateNode } from "../predicate";
+import type { PredicateNode } from "../predicate";
 import { spacing } from "../utils/spacing";
 import { compileAsVar, compileDirectives } from "./filter.compiler";
 import { buildFragment } from "./fragment.builder";
 
 export function buildNode(
   currentNode: DNode,
-  nextPredNode: DPredicateNode<DNode>,
+  nextPredNode: PredicateNode<DNode>,
   predName: string,
   nextFragment: NextFragment<DNode>,
   usedVars: Map<string, unknown>,
@@ -45,7 +45,7 @@ export function buildNode(
 
 export function forwardReverseNode(
   currentNode: DNode,
-  nextPredNode: DPredicateNode<DNode>,
+  nextPredNode: PredicateNode<DNode>,
   predName: string,
   allowedValues: Set<string>,
   alias?: string,

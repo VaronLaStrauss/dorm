@@ -1,6 +1,6 @@
 import type { DEdge, EdgeType, InferEdge } from "./edge";
 import type { DNode } from "./node";
-import type { DPredicateNode, ExtendedPredicates, Forward } from "./predicate";
+import type { PredicateNode, ExtendedPredicates, Forward } from "./predicate";
 import type { Flatten, NullableType, UnionToIntersection } from "./utils/types";
 
 export function mutate<DN extends DNode>(
@@ -29,7 +29,7 @@ export function mutate<DN extends DNode>(
     const pred = actualNode.predicates[fieldName];
 
     if (typeof pred === "function") {
-      const nextPredNode = pred() as DPredicateNode<DNode>;
+      const nextPredNode = pred() as PredicateNode<DNode>;
       let values: unknown;
 
       if (value instanceof Array) {
@@ -60,7 +60,7 @@ export type MutationFields<
         ? Opts["type"] extends EdgeType.PASSWORD
           ? string | null | undefined
           : NullableType<Opts, InferEdge<Opts>> | null
-        : EP[key] extends () => DPredicateNode<
+        : EP[key] extends () => PredicateNode<
             infer NextDN,
             infer Rel,
             infer Opts

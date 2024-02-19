@@ -5,7 +5,7 @@ import {
   type IndexableEdge,
 } from "../edge";
 import type { DNode } from "../node";
-import type { DPredicateNode, ExtendedPredicates } from "../predicate";
+import type { PredicateNode, ExtendedPredicates } from "../predicate";
 import {
   AllIndexes,
   DateTimeIndex,
@@ -135,7 +135,7 @@ type FilterOpts = {
 };
 
 type FilterableKeys<DN extends DNode, EP = ExtendedPredicates<DN>> = {
-  [key in keyof EP]: EP[key] extends () => DPredicateNode<DNode>
+  [key in keyof EP]: EP[key] extends () => PredicateNode<DNode>
     ? key
     : EP[key] extends DEdge<infer Opts>
     ? Opts extends IndexableEdge

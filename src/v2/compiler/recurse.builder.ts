@@ -1,6 +1,6 @@
 import type { RecurseOpts } from "../filter";
 import type { DNode } from "../node";
-import type { DPredicateNode } from "../predicate";
+import type { PredicateNode } from "../predicate";
 import type { NextRecurseFragment, RecurseFragment } from "../recurse";
 import { spacing } from "../utils/spacing";
 import { buildEdge, buildStatic } from "./edge.builder";
@@ -45,7 +45,7 @@ export function buildRecurse<MainDN extends DNode, DNs extends DNode[]>(
     const pred = predicates[predName];
 
     if (typeof pred === "function") {
-      const nextPredNode = pred() as DPredicateNode<DNode>;
+      const nextPredNode = pred() as PredicateNode<DNode>;
       const inner = buildRecurseNode(
         currentNode,
         nextPredNode,
@@ -76,7 +76,7 @@ export function buildRecurse<MainDN extends DNode, DNs extends DNode[]>(
 
 export function buildRecurseNode(
   currentNode: DNode,
-  nextPredNode: DPredicateNode<DNode>,
+  nextPredNode: PredicateNode<DNode>,
   predName: string,
   nextFragment: NextRecurseFragment,
   usedVars: Map<string, unknown>,
