@@ -43,5 +43,10 @@ export function queryBlock<QI extends QueryItems>(
   let _varDec = Array.from(varDec);
   if (varDec.size) query += `(${_varDec.join(", ")})`;
   query += `{\n${queryStrs.join("\n")}\n}`;
-  return { query, varDec: _varDec, vars };
+  return {
+    query,
+    varDec: _varDec,
+    vars,
+    type: undefined as never as { [key in keyof QI]: QI[key]["type"] },
+  };
 }

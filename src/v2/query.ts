@@ -5,11 +5,11 @@ import type { DNode } from "./node";
 import { spacing } from "./utils/spacing";
 
 export function query<DN extends DNode, F extends Fragment<DN>>(
-  _queries: Query<DN, F>
+  _query: Query<DN, F>
 ) {
   const _space = spacing(1);
 
-  const { filter, cascade, fragOpts } = _queries;
+  const { filter, cascade, fragOpts } = _query;
   const { allowedValues, usedVars } = fragOpts;
 
   function build(
@@ -23,14 +23,19 @@ export function query<DN extends DNode, F extends Fragment<DN>>(
       allowedValues
     );
 
-    const mainFunc = compileMainFunc(_queries, usedVars, allowedValues);
+    const mainFunc = compileMainFunc(_query, usedVars, allowedValues);
     let query = `${_space}${key}(${mainFunc}) ${directives}`;
     if (fragOpts)
       query += `{\n${fragOpts.fragmentStr ?? fragOpts.build()}\n${_space}}`;
     return query;
   }
 
-  return { build, allowedValues, usedVars };
+  return {
+    build,
+    allowedValues,
+    usedVars,
+    type: undefined as never as Array<(typeof _query)["fragOpts"]["type"]>,
+  };
 }
 
 export type QueryOpts = { mainFunc: FilterEdge } & FilterFull;

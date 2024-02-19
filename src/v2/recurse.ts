@@ -41,7 +41,12 @@ export function recurse<
     return query;
   }
 
-  return { build, allowedValues, usedVars };
+  return {
+    build,
+    allowedValues,
+    usedVars,
+    type: undefined as never as Array<(typeof _query)["fragOpts"]["type"]>,
+  };
 }
 
 export function recurseFragment<

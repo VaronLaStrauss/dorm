@@ -79,6 +79,8 @@ const queries = queryBlock({
   }),
 });
 
+type UserQueries = typeof queries.type;
+
 console.log(queries.query);
 
 console.log("\n----- MUTATION -----\n");
