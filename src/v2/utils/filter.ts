@@ -143,6 +143,7 @@ type FilterableKeys<DN extends DNode, EP = ExtendedPredicates<DN>> = {
       ? Opts["indexes"] extends
           | Array<keyof typeof StringIndex>
           | Array<keyof typeof DateTimeIndex>
+          | boolean
         ? key
         : never
       : never
