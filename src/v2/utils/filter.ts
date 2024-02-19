@@ -21,7 +21,7 @@ export function filterablePreds<DN extends DNode, F extends Filterables<DN>>(
 ) {
   const predToNode = node.getPredToNode();
   const predicates = node.extendedPredicates;
-  const allowedFilters: AllowedFilters = {} as never;
+  const allowedFilters: AllowedFilters<F> = {} as never;
 
   for (const predName in filterables) {
     const pred = predicates[predName];
@@ -119,16 +119,17 @@ function parseJsType(ops: EdgeInit) {
   return "string";
 }
 
-type AllowedFilters = Record<
-  string,
-  {
+type AllowedFilters<
+  FilterRecord extends Record<string, unknown> = Record<string, unknown>
+> = {
+  [key in keyof FilterRecord | "uid" | "dtype"]: {
     jsType: ReturnType<typeof parseJsType>;
     indexes: { [key in keyof typeof AllIndexes]?: (typeof AllIndexes)[key] };
     label: string;
     field: string;
     allowedValues?: Record<string | number, string | number>;
-  }
->;
+  };
+};
 
 type FilterOpts = {
   label: string;
