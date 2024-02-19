@@ -2,7 +2,10 @@ import { parseDqlType } from "./compiler/dql-type.parser";
 import type { query } from "./query";
 import type { recurse } from "./recurse";
 
-type QueryItems = Record<string, ReturnType<typeof query | typeof recurse>>;
+export type QueryItems = Record<
+  string,
+  ReturnType<typeof query | typeof recurse>
+>;
 
 export function queryBlock<QI extends QueryItems>(
   queries: QI,
