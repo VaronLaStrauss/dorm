@@ -119,7 +119,7 @@ function parseJsType(ops: EdgeInit) {
   return "string";
 }
 
-type AllowedFilters<
+export type AllowedFilters<
   FilterRecord extends Record<string, unknown> = Record<string, unknown>
 > = {
   [key in keyof FilterRecord | "uid" | "dtype"]: {
