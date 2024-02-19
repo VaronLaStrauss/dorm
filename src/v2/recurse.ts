@@ -2,7 +2,7 @@ import { compileDirectives, compileMainFunc } from "./compiler/filter.compiler";
 import { buildRecurse, compileRecurse } from "./compiler/recurse.builder";
 import type { DEdge, EdgeInit, EdgeType, InferEdge } from "./edge";
 import type { FilterEdge, FilterFull, RecurseOpts } from "./filter";
-import type { ExpoundPred } from "./fragment";
+import type { ExpoundPred, ExpoundStatic } from "./fragment";
 import { DNode } from "./node";
 import type {
   PredicateNode,
@@ -134,6 +134,10 @@ export type InferRecurseFragment<
                   InferRecurseFragment<NextDN, DNs, RF>
                 >;
               }
+          : never
+        : key extends "uid" | "dtype"
+        ? RF[key] extends PredOpt | boolean
+          ? ExpoundStatic<RF[key], key>
           : never
         : never;
     }[keyof RF]

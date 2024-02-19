@@ -1,13 +1,9 @@
-import { queryBlock } from "../query-block";
-import { fragment, type InferFragment } from "../fragment";
+import { fragment } from "../fragment";
 import { mutate } from "../mutation";
 import { pass, pred } from "../predicate";
 import { query } from "../query";
-import {
-  recurseFragment,
-  type InferRecurseFragment,
-  recurse,
-} from "../recurse";
+import { queryBlock } from "../query-block";
+import { recurse, recurseFragment } from "../recurse";
 import { filterablePreds } from "../utils/filter";
 import { Audit } from "./audit";
 import { Content } from "./contact";
@@ -54,6 +50,7 @@ const userRecurseFrag = recurseFragment(
     user: true,
     content: true,
     detail: true,
+    uid: true,
   },
   true
 );
