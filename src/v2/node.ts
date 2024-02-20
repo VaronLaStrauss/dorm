@@ -81,7 +81,7 @@ export class DNodeExtended<
     return [this.name, ...this.extendedNodes.map((node) => node.name)];
   }
 
-  get extendedPredicates(): NodePredicateRecord {
+  override get extendedPredicates(): NodePredicateRecord {
     if (this._extendedPredicates) return this._extendedPredicates;
     const extended = this.extendedNodes.reduce((acc, curr) => {
       return { ...curr.extendedPredicates, ...acc };
