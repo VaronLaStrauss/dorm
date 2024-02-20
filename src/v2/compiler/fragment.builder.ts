@@ -1,6 +1,6 @@
 import type { Fragment, NextFragment } from "../fragment";
 import type { DNode } from "../node";
-import type { PredicateNode } from "../predicate";
+import type { PredOpt, PredicateNode } from "../predicate";
 import { buildStatic, buildEdge } from "./edge.builder";
 import { buildNode } from "./node.builder";
 
@@ -21,7 +21,7 @@ export function buildFragment<DN extends DNode, F extends Fragment<DN>>(
     if (predName === "uid" || predName === "dtype") {
       const inner = buildStatic(
         predName as Parameters<typeof buildStatic>[0],
-        opts,
+        opts as boolean | PredOpt,
         allowedValues,
         level
       );
@@ -55,7 +55,7 @@ export function buildFragment<DN extends DNode, F extends Fragment<DN>>(
       predName,
       pred,
       currentNode,
-      opts,
+      opts as boolean | PredOpt ,
       usedVars,
       allowedValues,
       level
