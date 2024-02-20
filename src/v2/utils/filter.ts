@@ -123,17 +123,19 @@ function parseJsType(ops: EdgeInit) {
   return "string";
 }
 
+export type AllowedFilter = {
+  jsType: ReturnType<typeof parseJsType>;
+  indexes: { [key in keyof typeof AllIndexes]?: (typeof AllIndexes)[key] };
+  label: string;
+  field: string;
+  allowedValues?: Record<string | number, string | number>;
+  nodeName: string;
+};
+
 export type AllowedFilters<
   FilterRecord extends Record<string, unknown> = Record<string, unknown>
 > = {
-  [key in keyof FilterRecord | "uid" | "dtype"]: {
-    jsType: ReturnType<typeof parseJsType>;
-    indexes: { [key in keyof typeof AllIndexes]?: (typeof AllIndexes)[key] };
-    label: string;
-    field: string;
-    allowedValues?: Record<string | number, string | number>;
-    nodeName: string;
-  };
+  [key in keyof FilterRecord | "uid" | "dtype"]: AllowedFilter
 };
 
 type FilterOpts = {
