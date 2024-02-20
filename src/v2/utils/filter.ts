@@ -34,6 +34,7 @@ export function filterablePreds<DN extends DNode, F extends Filterables<DN>>(
         indexes: { uid_in: Indexless["uid_in"] },
         label,
         field,
+        nodeName: node.name,
         jsType: "string" as const,
       };
       continue;
@@ -53,6 +54,7 @@ export function filterablePreds<DN extends DNode, F extends Filterables<DN>>(
       label,
       field,
       jsType,
+      nodeName: node.name,
       allowedValues:
         "allowedValues" in options ? options.allowedValues : undefined,
     };
@@ -63,6 +65,7 @@ export function filterablePreds<DN extends DNode, F extends Filterables<DN>>(
     label: "Type",
     field: "dgraph.type",
     jsType: "string",
+    nodeName: node.name,
   };
 
   allowedFilters["uid"] = {
@@ -70,6 +73,7 @@ export function filterablePreds<DN extends DNode, F extends Filterables<DN>>(
     label: "ID",
     field: "uid",
     jsType: "string",
+    nodeName: node.name,
   };
 
   return allowedFilters;
@@ -128,6 +132,7 @@ export type AllowedFilters<
     label: string;
     field: string;
     allowedValues?: Record<string | number, string | number>;
+    nodeName: string;
   };
 };
 
