@@ -7,4 +7,5 @@ export * from "./predicate";
 export * from "./query";
 export * from "./query-block";
 export * from "./recurse";
+export * from './schema';
 export * from "./utils";
