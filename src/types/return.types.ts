@@ -18,7 +18,7 @@ import type {
   Composite,
   NullableType,
   PredicateType,
-  type UnionToIntersection,
+  UnionToIntersection,
 } from "../utils";
 import type {
   Fragment,
