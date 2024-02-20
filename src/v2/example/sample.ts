@@ -4,10 +4,11 @@ import { pass, pred } from "../predicate";
 import { query } from "../query";
 import { queryBlock } from "../query-block";
 import { recurse, recurseFragment } from "../recurse";
+import { schema } from "../schema";
 import { filterablePreds } from "../utils/filter";
 import { Audit } from "./audit";
 import { Content } from "./contact";
-import { User } from "./user";
+import { Employee, Human, User } from "./user";
 
 console.log("\n---- FRAGMENT -----\n");
 
@@ -98,3 +99,8 @@ const filterables = filterablePreds(User, {
   audits: { label: "x" },
 });
 console.log(JSON.stringify(filterables, undefined, 2));
+
+console.log("\n----- SCHEMA -----\n");
+
+const schemaStr = schema(Human, Employee, User, Audit, Content);
+console.log(schemaStr);
