@@ -1,6 +1,7 @@
 import { predToNode, type PredToNode } from "./compiler/pred-to-node";
 import type { DEdge } from "./edge";
 import type { PredicateNode } from "./predicate";
+import { extractAllNodes } from "./utils/extract-nodes";
 
 export type NodePredicate =
   // @ts-expect-error: DEdge is kept like this because error expected to allow for recursive types on typescript@5.3.3
@@ -60,6 +61,8 @@ export class DNodeExtended<
   NPR extends NodePredicateRecord = NodePredicateRecord
 > extends DNode<name, NPR> {
   _extendedPredicates?: NodePredicateRecord;
+  extractedNodes?: DNode[];
+
   constructor(name: name, predicates: NPR, public extendedNodes: EN) {
     super(name, predicates);
   }
@@ -69,11 +72,11 @@ export class DNodeExtended<
     DNode<string, NodePredicateRecord>
   > {
     let predToType = this._predToNode;
-    if (!predToType)
-      predToType = this.setPredToNode([
-        ...(this.extendedNodes as DNode[]),
-        this as never,
-      ]);
+    if (!predToType) {
+      if (!this.extractedNodes)
+        this.extractedNodes = extractAllNodes(this.extendedNodes);
+      predToType = this.setPredToNode([...this.extractedNodes, this as never]);
+    }
     return predToType;
   }
 
