@@ -35,7 +35,7 @@ export type InferEdge<Opts extends EdgeInit> = Opts extends StringEdge
   : Opts extends BoolEdge
   ? boolean
   : Opts extends DateTimeEdge
-  ? Date
+  ? Date | string
   : Opts extends FloatEdge | IntEdge
   ? Opts["allowedValues"] extends Record<number, infer U>
     ? U
