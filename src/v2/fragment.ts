@@ -26,7 +26,10 @@ export function fragment<DN extends DNode, F extends Fragment<DN>>(
   buildNow = true
 ): FragmentReturn<DN, F> {
   const usedVars = new Map<string, unknown>();
-  const allowedValues = new Set<string>([...node.getAllowedValues()]);
+  const allowedValues = new Set<string>([
+    ...node.getAllowedValues(),
+    ...node.typeNames,
+  ]);
 
   function build() {
     return buildFragment(node, fragment, usedVars, allowedValues, 2);

@@ -61,7 +61,7 @@ export class DNodeExtended<
   NPR extends NodePredicateRecord = NodePredicateRecord
 > extends DNode<name, NPR> {
   _extendedPredicates?: NodePredicateRecord;
-  extractedNodes?: DNode[];
+  _extractedNodes?: DNode[];
 
   constructor(name: name, predicates: NPR, public extendedNodes: EN) {
     super(name, predicates);
@@ -73,15 +73,21 @@ export class DNodeExtended<
   > {
     let predToType = this._predToNode;
     if (!predToType) {
-      if (!this.extractedNodes)
-        this.extractedNodes = extractAllNodes(this.extendedNodes);
-      predToType = this.setPredToNode([...this.extractedNodes, this as never]);
+      const extractedNodes = this.extractedNodes;
+      predToType = this.setPredToNode([...extractedNodes, this as never]);
     }
     return predToType;
   }
 
   override get typeNames() {
-    return [this.name, ...this.extendedNodes.map((node) => node.name)];
+    const nodes = this.extractedNodes;
+    return [this.name, ...nodes.map((node) => node.name)];
+  }
+
+  private get extractedNodes() {
+    if (!this._extractedNodes)
+      this._extractedNodes = extractAllNodes(this.extendedNodes);
+    return this._extractedNodes;
   }
 
   override get extendedPredicates(): NodePredicateRecord {
