@@ -104,3 +104,17 @@ console.log("\n----- SCHEMA -----\n");
 
 const schemaStr = schema(Human, Employee, User, Audit, Content);
 console.log(schemaStr);
+
+console.log("\n----- OPTS CHANGE -----\n");
+const commonFrag = fragment(Human, {
+  uid: true,
+  dtype: true,
+});
+
+const commonQ = query({
+  mainFunc: { op: "type", value: "SomeNonExistentType" },
+  fragOpts: commonFrag,
+  append: { allowedValues: new Set(["SomeNonExistentType"]) },
+});
+
+const commonQBlock = queryBlock({ commonQ });

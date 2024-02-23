@@ -9,8 +9,17 @@ export function query<DN extends DNode, F extends Fragment<DN>>(
 ) {
   const _space = spacing(1);
 
-  const { filter, cascade, fragOpts } = _query;
-  const { allowedValues, usedVars } = fragOpts;
+  const { filter, cascade, fragOpts, override, append } = _query;
+  const { usedVars } = fragOpts;
+  let { allowedValues } = fragOpts;
+  if (append) {
+    if (append.allowedValues) {
+      allowedValues = new Set([...allowedValues, ...append.allowedValues]);
+    }
+  }
+  if (override) {
+    if (override.allowedValues) allowedValues = override.allowedValues;
+  }
 
   function build(
     key: string,
@@ -42,4 +51,10 @@ export type QueryOpts = { mainFunc: FilterEdge } & FilterFull;
 
 export type Query<DN extends DNode, F extends Fragment<DN>> = {
   fragOpts: FragmentReturn<DN, F>;
+  append?: OptsChange;
+  override?: OptsChange;
 } & QueryOpts;
+
+type OptsChange = {
+  allowedValues?: Set<string>;
+};
