@@ -36,6 +36,8 @@ export function mutate<DN extends DNode>(
         values = value.map((val) =>
           mutate(nextPredNode.nextNode, val as never)
         );
+      } else if (value === undefined || value === null) {
+        values = value;
       } else {
         values = mutate(nextPredNode.nextNode, value as never);
       }
