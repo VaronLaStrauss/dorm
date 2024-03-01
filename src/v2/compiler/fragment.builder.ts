@@ -1,8 +1,8 @@
 import type { Fragment, NextFragment } from "../fragment";
 import type { DNode } from "../node";
-import type { PredOpt, PredicateNode } from "../predicate";
-import { buildStatic, buildEdge } from "./edge.builder";
-import { buildNode } from "./node.builder";
+import type { CountOpt, PredOpt, PredicateNode } from "../predicate";
+import { buildStatic, buildEdge, buildStaticCount } from "./edge.builder";
+import { buildCountable, buildNode } from "./node.builder";
 
 export function buildFragment<DN extends DNode, F extends Fragment<DN>>(
   node: DN,
@@ -19,12 +19,43 @@ export function buildFragment<DN extends DNode, F extends Fragment<DN>>(
     if (!opts) continue;
 
     if (predName === "uid" || predName === "dtype") {
-      const inner = buildStatic(
-        predName as Parameters<typeof buildStatic>[0],
-        opts as boolean | PredOpt,
-        allowedValues,
-        level
-      );
+      let inner: string;
+      if (opts instanceof Array) {
+        inner = opts
+          .map((opt) => {
+            if (typeof opt === "object" && "asCount" in opt) {
+              return buildStaticCount(
+                "uid",
+                opt as CountOpt,
+                allowedValues,
+                level
+              );
+            }
+            return buildStatic(
+              predName as Parameters<typeof buildStatic>[0],
+              opt as boolean | PredOpt,
+              allowedValues,
+              level
+            );
+          })
+          .join("\n");
+      } else {
+        if (typeof opts === "object" && "asCount" in opts) {
+          inner = buildStaticCount(
+            "uid",
+            opts as CountOpt,
+            allowedValues,
+            level
+          );
+        } else {
+          inner = buildStatic(
+            predName as Parameters<typeof buildStatic>[0],
+            opts as boolean | PredOpt,
+            allowedValues,
+            level
+          );
+        }
+      }
       inners.push(inner);
       continue;
     }
@@ -38,28 +69,83 @@ export function buildFragment<DN extends DNode, F extends Fragment<DN>>(
       for (const allowedValue of nextPredNode.nextNode.getAllowedValues())
         allowedValues.add(allowedValue);
 
-      const inner = buildNode(
-        currentNode,
-        nextPredNode,
-        predName,
-        opts as NextFragment<DNode>,
-        usedVars,
-        allowedValues,
-        level
-      );
+      let inner: string;
+      if (opts instanceof Array) {
+        inner = opts
+          .map((opt) => {
+            if (typeof opt === "object" && "asCount" in opt) {
+              return buildCountable(
+                currentNode,
+                nextPredNode,
+                predName,
+                opt as CountOpt,
+                allowedValues,
+                level
+              );
+            }
+            return buildNode(
+              currentNode,
+              nextPredNode,
+              predName,
+              opt as NextFragment<DNode>,
+              usedVars,
+              allowedValues,
+              level
+            );
+          })
+          .join("\n");
+      } else {
+        if (typeof opts === "object" && "asCount" in opts) {
+          inner = buildCountable(
+            currentNode,
+            nextPredNode,
+            predName,
+            opts as CountOpt,
+            allowedValues,
+            level
+          );
+        } else {
+          inner = buildNode(
+            currentNode,
+            nextPredNode,
+            predName,
+            opts as NextFragment<DNode>,
+            usedVars,
+            allowedValues,
+            level
+          );
+        }
+      }
       inners.push(inner);
       continue;
     }
 
-    const inner = buildEdge(
-      predName,
-      pred,
-      currentNode,
-      opts as boolean | PredOpt ,
-      usedVars,
-      allowedValues,
-      level
-    );
+    let inner: string;
+    if (opts instanceof Array) {
+      inner = opts
+        .map((opt) =>
+          buildEdge(
+            predName,
+            pred,
+            currentNode,
+            opt as boolean | PredOpt,
+            usedVars,
+            allowedValues,
+            level
+          )
+        )
+        .join("\n");
+    } else {
+      inner = buildEdge(
+        predName,
+        pred,
+        currentNode,
+        opts as boolean | PredOpt,
+        usedVars,
+        allowedValues,
+        level
+      );
+    }
     inners.push(inner);
   }
 

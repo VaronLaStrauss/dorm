@@ -1,6 +1,6 @@
 import { fragment } from "../fragment";
 import { mutate } from "../mutation";
-import { pass, pred } from "../predicate";
+import { count, pass, pred } from "../predicate";
 import { query } from "../query";
 import { queryBlock } from "../query-block";
 import { recurse, recurseFragment } from "../recurse";
@@ -15,22 +15,25 @@ console.log("\n---- FRAGMENT -----\n");
 const userFrag = fragment(
   User,
   {
-    uid: pred("id"),
-    employeeCode: true,
+    uid: [pred("id"), count("uidCount")],
+    employeeCode: [pred("employeeCodeAlias1"), pred("employeeCodeAlias2")],
     name: true,
     active: true,
-    password: pass("$pass1"),
-    audits: {
-      opts: pred("userAudits"),
-      predicates: {
-        user: {
-          predicates: {
-            name: pred("userName", "varFromOtherQuery"),
+    password: [pass("$pass1", "passCheck"), pass("$pass2", "passwordRecheck")],
+    audits: [
+      {
+        predicates: {
+          users: {
+            predicates: {
+              uid: [count(), pred("actualUid")],
+              name: pred("userName", "varFromOtherQuery"),
+            },
           },
         },
+        filter: { op: "eq", field: "", value: "" },
       },
-      filter: { op: "eq", field: "", value: "" },
-    },
+      count("auditCount"),
+    ],
   },
   true
 );
@@ -45,10 +48,15 @@ const userRecurseFrag = recurseFragment(
   User,
   [Audit, Content],
   {
-    audits: { opts: pred("history") },
-    employeeCode: true,
+    audits: [
+      { opts: pred("history") },
+      { opts: pred("historicalData") },
+      count("auditCount"),
+    ],
+    employeeCode: [pred("code1"), pred("code2")],
     name: pred(undefined, "existingAsVar"),
-    user: true,
+    users: [count(), count("userAuditCount"), { opts: pred("userAudits") }],
+    // users: count(),
     content: true,
     detail: true,
     uid: true,

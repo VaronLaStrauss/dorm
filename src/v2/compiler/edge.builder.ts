@@ -1,5 +1,5 @@
 import { compileAsVar } from "./filter.compiler";
-import { type PassOpt, type PredOpt } from "../predicate";
+import { type CountOpt, type PassOpt, type PredOpt } from "../predicate";
 import { spacing } from "../utils/spacing";
 import { EdgeType, type DEdge, type EdgeInit } from "../edge";
 import type { DNode } from "../node";
@@ -53,6 +53,18 @@ export function buildStatic(
   const { alias, asVar } = opts;
   const _asVar = compileAsVar(asVar, allowedValues);
   return `${_space}${alias ?? predName}:${_asVar}${edgeName}`;
+}
+
+export function buildStaticCount(
+  predName: "uid",
+  opts: CountOpt,
+  allowedValues: Set<string>,
+  level = 1
+) {
+  const _space = spacing(level);
+  const { alias, asVar } = opts;
+  const _asVar = compileAsVar(asVar, allowedValues);
+  return `${_space}${alias ?? predName}:${_asVar}count(uid)`;
 }
 
 export function parseStaticPred(predName: "uid" | "dtype") {

@@ -1,3 +1,5 @@
+import type { PredNodeOpts, PredOpt } from "../predicate";
+
 export type Composite<V> = {
   [key in keyof V]: V[key];
 };
@@ -27,3 +29,20 @@ export type NullableType<Opts extends InitOpts, V> = Nullable<
   Opts,
   AsArray<Opts, V>
 >;
+
+export type FragmentCommonReturn = {
+  fragmentStr?: string;
+  usedVars: Map<string, unknown>;
+  allowedValues: Set<string>;
+  build: () => string;
+};
+
+export type Countable<
+  PO extends PredOpt,
+  Opts extends PredNodeOpts | "uid",
+  key extends string | number | symbol
+> = Opts extends { count: true } | "uid"
+  ? PO["alias"] extends string
+    ? { [k in PO["alias"]]: number }
+    : { [k in key]: number }
+  : never;

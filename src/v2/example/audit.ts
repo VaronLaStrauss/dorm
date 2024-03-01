@@ -4,6 +4,7 @@ import { Content } from "./contact";
 import { User } from "./user";
 
 export const Audit = node("Audit", {
-  user: () => predicateNode(User, reverse("audits")),
+  users: () =>
+    predicateNode(User, reverse("audits"), { count: true, asArray: true }),
   content: () => predicateNode(Content, forward()),
 });

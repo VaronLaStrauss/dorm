@@ -2,15 +2,23 @@ import { compileDirectives, compileMainFunc } from "./compiler/filter.compiler";
 import { buildRecurse, compileRecurse } from "./compiler/recurse.builder";
 import type { DEdge, EdgeInit, EdgeType, InferEdge } from "./edge";
 import type { FilterEdge, FilterFull, RecurseOpts } from "./filter";
-import type { ExpoundPred, ExpoundStatic } from "./fragment";
+import type { EdgeFragment, ExpoundPred, ExpoundStatic } from "./fragment";
 import { DNode } from "./node";
 import type {
   PredicateNode,
   ExtendedPredicates,
   PassOpt,
   PredOpt,
+  CountOpt,
+  PredNodeOpts,
 } from "./predicate";
-import type { Flatten, NullableType, UnionToIntersection } from "./utils/types";
+import type {
+  Countable,
+  Flatten,
+  FragmentCommonReturn,
+  NullableType,
+  UnionToIntersection,
+} from "./utils/types";
 import { spacing } from "./utils/spacing";
 
 export function recurse<
@@ -99,41 +107,17 @@ export type InferRecurseFragment<
     {
       [key in keyof RF]: key extends keyof EP
         ? EP[key] extends DEdge<infer Opts>
-          ? ExpoundPred<RF[key], Opts, key, InferEdge<Opts>>
+          ? RF[key] extends boolean | PredOpt
+            ? ExpoundPred<RF[key], Opts, key, InferEdge<Opts>>
+            : RF[key] extends Array<PredOpt>
+            ? ExpoundPred<RF[key][number], Opts, key, InferEdge<Opts>>
+            : never // when undefined
           : EP[key] extends () => PredicateNode<
               infer NextDN,
               infer _,
               infer Opts
             >
-          ? NextDN extends DNs[number]
-            ? RF[key] extends {
-                opts: PredOpt;
-              } & FilterFull
-              ? RF[key]["opts"]["alias"] extends string
-                ? {
-                    [k in RF[key]["opts"]["alias"]]: NullableType<
-                      Opts,
-                      InferRecurseFragment<NextDN, DNs, RF>
-                    >;
-                  }
-                : {
-                    [k in key]: NullableType<
-                      Opts,
-                      InferRecurseFragment<NextDN, DNs, RF>
-                    >;
-                  }
-              : {
-                  [k in key]: NullableType<
-                    Opts,
-                    InferRecurseFragment<NextDN, DNs, RF>
-                  >;
-                }
-            : {
-                [k in key]: NullableType<
-                  Opts,
-                  InferRecurseFragment<NextDN, DNs, RF>
-                >;
-              }
+          ? _SwitchingInferRecurseFragment<MainDN, NextDN, Opts, DNs, RF, key>
           : never
         : key extends "uid" | "dtype"
         ? RF[key] extends PredOpt | boolean
@@ -144,26 +128,59 @@ export type InferRecurseFragment<
   >
 >;
 
+type _SwitchingInferRecurseFragment<
+  MainDN extends DNode,
+  NextDN extends DNode,
+  Opts extends PredNodeOpts,
+  DNs extends DNode[],
+  RF extends RecurseFragment<MainDN | DNs[number]>,
+  key extends keyof RF
+> = RF[key] extends CountOpt
+  ? Countable<RF[key], Opts, key>
+  : RF[key] extends {
+      opts: PredOpt;
+    }
+  ? RF[key]["opts"]["alias"] extends string
+    ? InferNextRecurseFragment<RF[key]["opts"]["alias"], NextDN, DNs, RF>
+    : InferNextRecurseFragment<key, NextDN, DNs, RF>
+  : RF[key] extends Array<infer RFOpts>
+  ? RFOpts extends CountOpt
+    ? Countable<RFOpts, Opts, key>
+    : RFOpts extends { opts: PredOpt }
+    ? RFOpts["opts"]["alias"] extends string
+      ? InferNextRecurseFragment<RFOpts["opts"]["alias"], NextDN, DNs, RF>
+      : InferNextRecurseFragment<key, NextDN, DNs, RF>
+    : never
+  : InferNextRecurseFragment<key, NextDN, DNs, RF>;
+
+type InferNextRecurseFragment<
+  key extends string | symbol | number,
+  NextDN extends DNode,
+  DNs extends DNode[],
+  RF extends RecurseFragment<NextDN | DNs[number]>
+> = {
+  [k in key]: InferRecurseFragment<NextDN, DNs, RF>;
+};
+
 export type RecurseFragmentReturn<
   MainDN extends DNode,
   DNs extends DNode[],
   RF extends RecurseFragment<MainDN | DNs[number]>
 > = {
   fragment: RF;
-  build: () => string;
   type: InferRecurseFragment<MainDN, DNs, RF>;
-  fragmentStr?: string;
-  usedVars: Map<string, unknown>;
-  allowedValues: Set<string>;
-};
+} & FragmentCommonReturn;
+
+export type SingleNextRecurseFragment = Flatten<
+  {
+    opts?: PredOpt;
+  } & FilterFull
+>;
 
 export type NextRecurseFragment =
   | boolean
-  | Flatten<
-      {
-        opts?: PredOpt;
-      } & FilterFull
-    >;
+  | SingleNextRecurseFragment
+  | SingleNextRecurseFragment[];
 
 export type RecurseFragment<
   CurrentDN extends DNode,
@@ -175,7 +192,7 @@ export type RecurseFragment<
       : never
     : EP[predName] extends DEdge<infer Opts>
     ? Opts["type"] extends EdgeType.PASSWORD
-      ? PassOpt
-      : boolean | PredOpt
+      ? PassOpt | PassOpt[]
+      : EdgeFragment
     : never;
 } & Partial<{ uid: boolean | PredOpt; dtype: boolean | PredOpt }>;

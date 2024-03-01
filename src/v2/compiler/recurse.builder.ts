@@ -1,11 +1,11 @@
 import type { RecurseOpts } from "../filter";
 import type { DNode } from "../node";
-import type { PredicateNode } from "../predicate";
-import type { NextRecurseFragment, RecurseFragment } from "../recurse";
+import type { CountOpt, PredOpt, PredicateNode } from "../predicate";
+import type { RecurseFragment, SingleNextRecurseFragment } from "../recurse";
 import { spacing } from "../utils/spacing";
-import { buildEdge, buildStatic } from "./edge.builder";
+import { buildEdge, buildStatic, buildStaticCount } from "./edge.builder";
 import { compileDirectives } from "./filter.compiler";
-import { forwardReverseNode } from "./node.builder";
+import { buildCountable, forwardReverseNode } from "./node.builder";
 import { type PredToNode } from "./pred-to-node";
 
 export function buildRecurse<MainDN extends DNode, DNs extends DNode[]>(
@@ -29,12 +29,43 @@ export function buildRecurse<MainDN extends DNode, DNs extends DNode[]>(
     if (!opts) continue;
 
     if (predName === "uid" || predName === "dtype") {
-      const inner = buildStatic(
-        predName as Parameters<typeof buildStatic>[0],
-        opts,
-        allowedValues,
-        level
-      );
+      let inner: string;
+      if (opts instanceof Array) {
+        inner = opts
+          .map((opt) => {
+            if ("asCount" in opt) {
+              return buildStaticCount(
+                "uid",
+                opt as CountOpt,
+                allowedValues,
+                level
+              );
+            }
+            return buildStatic(
+              predName as Parameters<typeof buildStatic>[0],
+              opt,
+              allowedValues,
+              level
+            );
+          })
+          .join("\n");
+      } else {
+        if (typeof opts === "object" && "asCount" in opts) {
+          inner = buildStaticCount(
+            "uid",
+            opts as CountOpt,
+            allowedValues,
+            level
+          );
+        } else {
+          inner = buildStatic(
+            predName,
+            opts as boolean | PredOpt,
+            allowedValues,
+            level
+          );
+        }
+      }
       inners.push(inner);
       continue;
     }
@@ -46,28 +77,83 @@ export function buildRecurse<MainDN extends DNode, DNs extends DNode[]>(
 
     if (typeof pred === "function") {
       const nextPredNode = pred() as PredicateNode<DNode>;
-      const inner = buildRecurseNode(
-        currentNode,
-        nextPredNode,
-        predName,
-        opts as NextRecurseFragment,
-        usedVars,
-        allowedValues,
-        level
-      );
+      let inner: string;
+      if (opts instanceof Array) {
+        inner = opts
+          .map((opt) => {
+            if ("asCount" in opt) {
+              return buildCountable(
+                currentNode,
+                nextPredNode,
+                predName,
+                opt as CountOpt,
+                allowedValues,
+                level
+              );
+            }
+            return buildRecurseNode(
+              currentNode,
+              nextPredNode,
+              predName,
+              opt as SingleNextRecurseFragment,
+              usedVars,
+              allowedValues,
+              level
+            );
+          })
+          .join("\n");
+      } else {
+        if (typeof opts === "object" && "asCount" in opts) {
+          inner = buildCountable(
+            currentNode,
+            nextPredNode,
+            predName,
+            opts as CountOpt,
+            allowedValues,
+            level
+          );
+        } else {
+          inner = buildRecurseNode(
+            currentNode,
+            nextPredNode,
+            predName,
+            opts as SingleNextRecurseFragment,
+            usedVars,
+            allowedValues,
+            level
+          );
+        }
+      }
       inners.push(inner);
       continue;
     }
 
-    const inner = buildEdge(
-      predName,
-      pred,
-      currentNode,
-      opts,
-      usedVars,
-      allowedValues,
-      level
-    );
+    let inner: string;
+    if (opts instanceof Array) {
+      inner = opts
+        .map((opt) =>
+          buildEdge(
+            predName,
+            pred,
+            currentNode,
+            opt,
+            usedVars,
+            allowedValues,
+            level
+          )
+        )
+        .join("\n");
+    } else {
+      inner = buildEdge(
+        predName,
+        pred,
+        currentNode,
+        opts,
+        usedVars,
+        allowedValues,
+        level
+      );
+    }
     inners.push(inner);
   }
 
@@ -78,7 +164,7 @@ export function buildRecurseNode(
   currentNode: DNode,
   nextPredNode: PredicateNode<DNode>,
   predName: string,
-  nextFragment: NextRecurseFragment,
+  nextFragment: SingleNextRecurseFragment,
   usedVars: Map<string, unknown>,
   allowedValues: Set<string>,
   level = 2

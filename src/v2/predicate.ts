@@ -4,12 +4,8 @@ import type { InitOpts, UnionToIntersection } from "./utils/types";
 export function pred<
   alias extends string | undefined,
   asVar extends string | undefined
->(
-  alias: alias = undefined as alias,
-  asVar: asVar = undefined as asVar,
-  custom?: string
-) {
-  return { alias, asVar, custom };
+>(alias: alias = undefined as alias, asVar: asVar = undefined as asVar) {
+  return { alias, asVar };
 }
 
 export type PredOpt = ReturnType<typeof pred>;
@@ -20,10 +16,9 @@ export function pass<
 >(
   pwdVar: string,
   alias: alias = undefined as alias,
-  asVar: asVar = undefined as asVar,
-  custom?: string
+  asVar: asVar = undefined as asVar
 ) {
-  return { pwdVar, alias, asVar, custom };
+  return { pwdVar, alias, asVar };
 }
 
 export type PassOpt = ReturnType<typeof pass>;
@@ -44,10 +39,21 @@ export function forward() {
 
 export type Forward = ReturnType<typeof forward>;
 
+export function count<
+  alias extends string | undefined,
+  asVar extends string | undefined
+>(alias: alias = undefined as alias, asVar: asVar = undefined as asVar) {
+  return { asCount: true as true, alias, asVar };
+}
+
+export type CountOpt = ReturnType<typeof count>;
+
+export type PredNodeOpts = InitOpts & { count?: true };
+
 export function predicateNode<
   NextDN extends DNode,
   Rel extends Reverse<NextDN> | Forward = Forward | Reverse<NextDN>,
-  Opts extends InitOpts = InitOpts
+  Opts extends PredNodeOpts = PredNodeOpts
 >(nextNode: NextDN, relation: Rel, opts: Opts = {} as Opts) {
   return { nextNode, relation, opts };
 }
@@ -55,7 +61,7 @@ export function predicateNode<
 export type PredicateNode<
   NextDN extends DNode,
   Rel extends Reverse<NextDN> | Forward = Forward | Reverse<NextDN>,
-  Opts extends InitOpts = InitOpts
+  Opts extends PredNodeOpts = PredNodeOpts
 > = ReturnType<typeof predicateNode<NextDN, Rel, Opts>>;
 
 export type ExtendedPredicates<DN extends DNode | DNodeExtended> =

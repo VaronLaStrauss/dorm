@@ -1,3 +1,4 @@
+import type { InitOpts } from "./utils/types";
 import type { DateTimeIndex, StringIndex } from "./utils/indexes";
 
 export class DEdge<Opts extends EdgeInit> {
@@ -66,11 +67,7 @@ export type IndexableEdge =
 
 export type Edge = IndexableEdge | PasswordEdge;
 
-export type EdgeInit = {
-  count?: true;
-  nullable?: true;
-  asArray?: true;
-} & Edge;
+export type EdgeInit = InitOpts & Edge;
 
 export type StringEdge = {
   indexes?: (keyof typeof StringIndex)[];
@@ -121,7 +118,6 @@ export type GeoEdge = {
 };
 
 export type PredFragmentOpt<A extends string = string> = {
-  custom?: string;
   alias?: A;
   asVar?: string;
 };

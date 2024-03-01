@@ -1,6 +1,6 @@
 import type { Fragment, NextFragment } from "../fragment";
 import type { DNode } from "../node";
-import type { PredicateNode } from "../predicate";
+import type { CountOpt, PredicateNode } from "../predicate";
 import { spacing } from "../utils/spacing";
 import { compileAsVar, compileDirectives } from "./filter.compiler";
 import { buildFragment } from "./fragment.builder";
@@ -43,6 +43,19 @@ export function buildNode(
   return `${_space}${relationStr} ${directives} {\n${inner}\n${_space}}`;
 }
 
+export function relationNode(
+  currentNode: DNode,
+  nextPredNode: PredicateNode<DNode>,
+  predName: string
+) {
+  const nodeName = currentNode.name;
+  const { relation } = nextPredNode;
+  let type: string;
+  if ("forward" in relation) type = `${nodeName}.${predName}`;
+  else type = `~${nextPredNode.nextNode.name}.${relation.predName}`;
+  return type;
+}
+
 export function forwardReverseNode(
   currentNode: DNode,
   nextPredNode: PredicateNode<DNode>,
@@ -51,11 +64,22 @@ export function forwardReverseNode(
   alias?: string,
   asVar?: string
 ) {
-  const nodeName = currentNode.name;
-  const { relation } = nextPredNode;
-  let type = "";
-  if ("forward" in relation) type += `${nodeName}.${predName}`;
-  else type += `~${nextPredNode.nextNode.name}.${relation.predName}`;
+  let type = relationNode(currentNode, nextPredNode, predName);
   if (asVar) type = `${compileAsVar(asVar, allowedValues)}${type}`;
   return `${alias ?? predName}: ${type}`;
+}
+
+export function buildCountable(
+  currentNode: DNode,
+  nextPredNode: PredicateNode<DNode>,
+  predName: string,
+  opts: CountOpt,
+  allowedValues: Set<string>,
+  level = 1
+) {
+  const _space = spacing(level);
+  const { alias, asVar } = opts;
+  const _asVar = compileAsVar(asVar, allowedValues);
+  const type = relationNode(currentNode, nextPredNode, predName);
+  return `${_space}${alias ?? predName}:${_asVar}count(${type})`;
 }
