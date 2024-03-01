@@ -49,6 +49,13 @@ export function fragment<DN extends DNode, F extends Fragment<DN>>(
   };
 }
 
+export function multi<
+  DN extends DNode,
+  Frags extends Array<NodeFragment<DN, InitOpts>>
+>(frags: [...Frags]) {
+  return frags;
+}
+
 export type NextFragment<NextDN extends DNode> = {
   predicates?: Fragment<NextDN>;
   opts?: PredOpt;
@@ -74,10 +81,10 @@ export type Fragment<
       ? PassOpt | PassOpt[]
       : EdgeFragment
     : never; // : EdgeFragment;
-} & Partial<{
-  uid: boolean | PredOpt | CountOpt | (PredOpt | CountOpt)[];
-  dtype: boolean | PredOpt;
-}>;
+} & {
+  uid?: boolean | PredOpt | CountOpt | (PredOpt | CountOpt)[];
+  dtype?: boolean | PredOpt;
+};
 
 type PredicatePortion<NextDN extends DNode> = {
   predicates: Fragment<NextDN>;
@@ -133,7 +140,7 @@ export type InferFragment<
           : QF[key] extends Array<infer PO>
           ? PO extends CountOpt
             ? Countable<PO, "uid", key>
-            : PO extends PredOpt
+            : PO extends PredOpt | boolean
             ? ExpoundStatic<PO, key>
             : never
           : never
