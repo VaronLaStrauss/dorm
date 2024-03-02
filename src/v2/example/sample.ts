@@ -26,29 +26,25 @@ const userFrag = fragment(
           user: {
             predicates: {
               uid: [count(), pred("actualUid")],
-              name: pred("userName", "varFromOtherQuery"),
             },
           },
         },
-        filter: { op: "eq", field: "", value: "" },
       },
       {
         opts: pred("innerAudit"),
+        filter: {
+          op: "eq",
+          field: "Human.name",
+          value: "varFromOtherQuery",
+          wrap: "uid",
+        },
         predicates: {
           uid: true,
-          // user: {
-          //   predicates: {
-          //     uid: [count(), pred("actualUid")],
-          //     name: pred("userName", "varFromOtherQuery"),
-          //   },
-          // },
         },
-        filter: { op: "eq", field: "", value: "" },
       },
-      // count("auditCount"),
     ]),
   },
-  true
+  { allowedValues: new Set(["varFromOtherQuery"]) }
 );
 
 console.log(userFrag.fragmentStr);
@@ -57,25 +53,19 @@ type InferUser = typeof userFrag.type;
 
 console.log("\n---- RECURSE -----\n");
 
-const userRecurseFrag = recurseFragment(
-  User,
-  [Audit, Content],
-  {
-    audits: [
-      { opts: pred("history") },
-      { opts: pred("historicalData") },
-      count("auditCount"),
-    ],
-    employeeCode: [pred("code1"), pred("code2")],
-    name: pred(undefined, "existingAsVar"),
-    user: [count(), count("userAuditCount"), { opts: pred("userAudits") }],
-    // user: count(),
-    content: true,
-    detail: true,
-    uid: true,
-  },
-  true
-);
+const userRecurseFrag = recurseFragment(User, [Audit, Content], {
+  audits: [
+    { opts: pred("history") },
+    { opts: pred("historicalData") },
+    count("auditCount"),
+  ],
+  employeeCode: [pred("code1"), pred("code2")],
+  name: [pred(undefined, "existingAsVar"), pred("uid2", "varFromOtherQuery")],
+  user: [count(), count("userAuditCount"), { opts: pred("userAudits") }],
+  content: true,
+  detail: true,
+  uid: true,
+});
 
 console.log(userRecurseFrag.fragmentStr);
 
@@ -94,7 +84,6 @@ const queries = queryBlock({
   }),
   userRecurse: recurse({
     mainFunc: { field: "Human.name", op: "eq", value: "existingAsVar" },
-    filter: { field: "Human.name", op: "eq", value: "varFromOtherQuery" },
     fragOpts: userRecurseFrag,
   }),
   user2: query({

@@ -5,7 +5,7 @@ import {
   type IndexableEdge,
 } from "../edge";
 import type { DNode } from "../node";
-import type { PredicateNode, ExtendedPredicates } from "../predicate";
+import type { ExtendedPredicates, PredicateNode } from "../predicate";
 import {
   AllIndexes,
   DateTimeIndex,
@@ -14,7 +14,6 @@ import {
   GeoIndex,
   Indexless,
   InequalityOps,
-  OneValIndex,
   StringIndex,
 } from "./indexes";
 

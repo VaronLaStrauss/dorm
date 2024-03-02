@@ -27,12 +27,15 @@ export type FragmentReturn<DN extends DNode, F extends Fragment<DN>> = {
 export function fragment<DN extends DNode, F extends Fragment<DN>>(
   node: DN,
   fragment: F,
+  opts = { allowedValues: new Set<string>() },
   buildNow = true
 ): FragmentReturn<DN, F> {
+  const { allowedValues: _av } = opts;
   const usedVars = new Map<string, unknown>();
   const allowedValues = new Set<string>([
     ...node.getAllowedValues(),
     ...node.typeNames,
+    ..._av,
   ]);
 
   function build() {
