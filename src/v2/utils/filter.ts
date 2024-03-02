@@ -10,8 +10,11 @@ import {
   AllIndexes,
   DateTimeIndex,
   DefaultIndex,
+  EqualityOps,
   GeoIndex,
   Indexless,
+  InequalityOps,
+  OneValIndex,
   StringIndex,
 } from "./indexes";
 
@@ -33,8 +36,16 @@ export function filterablePreds<DN extends DNode, F extends Filterables<DN>>(
       const {
         opts: { count },
       } = pred() as PredicateNode<DNode>;
+      const indexes = {
+        uid_in: Indexless["uid_in"],
+        ...(count && {
+          ...EqualityOps,
+          ...InequalityOps,
+        }),
+      };
+
       allowedFilters[predName] = {
-        indexes: { uid_in: Indexless["uid_in"] },
+        indexes,
         label,
         field,
         nodeName: node.name,
