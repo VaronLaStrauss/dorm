@@ -26,10 +26,11 @@ export function query<DN extends DNode, F extends Fragment<DN>>(
     usedVars: Map<string, unknown>,
     allowedValues: Set<string>
   ) {
+    allowedValues = new Set([...allowedValues, ..._allowedValues]);
     const directives = compileDirectives(
       { filter, cascade },
       usedVars,
-      new Set([...allowedValues, ..._allowedValues])
+      allowedValues
     );
 
     const mainFunc = compileMainFunc(_query, usedVars, allowedValues);
