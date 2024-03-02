@@ -33,20 +33,17 @@ export function parseFilter(
     );
   }
 
-  let field = filter.field;
-  if ("wrap" in filter) {
-    const wrapper = filter.wrap;
-    field = `${wrapper}(${field})`;
-  }
-
   if ("values" in filter) {
     const var1 = parseFilterValue(filter.values[0], usedVars, allowedValues);
     const var2 = parseFilterValue(filter.values[1], usedVars, allowedValues);
-    return `${filter.op}(${field}, ${var1}, ${var2})`;
+    return `${filter.op}(${filter.field}, ${var1}, ${var2})`;
   }
 
-  const var1 = parseFilterValue(filter.value, usedVars, allowedValues);
-  return `${filter.op}(${field}, ${var1})`;
+  let var1 = parseFilterValue(filter.value, usedVars, allowedValues);
+  if (allowedValues.has(var1) && filter.wrap) {
+    var1 = `${filter.wrap}(${var1})`;
+  }
+  return `${filter.op}(${filter.field}, ${var1})`;
 }
 
 function parseFilterValue(
