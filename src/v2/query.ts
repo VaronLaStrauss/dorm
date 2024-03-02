@@ -11,14 +11,14 @@ export function query<DN extends DNode, F extends Fragment<DN>>(
 
   const { filter, cascade, fragOpts, override, append } = _query;
   const { usedVars } = fragOpts;
-  let { allowedValues } = fragOpts;
+  let { allowedValues: _allowedValues } = fragOpts;
   if (append) {
     if (append.allowedValues) {
-      allowedValues = new Set([...allowedValues, ...append.allowedValues]);
+      _allowedValues = new Set([..._allowedValues, ...append.allowedValues]);
     }
   }
   if (override) {
-    if (override.allowedValues) allowedValues = override.allowedValues;
+    if (override.allowedValues) _allowedValues = override.allowedValues;
   }
 
   function build(
@@ -29,7 +29,7 @@ export function query<DN extends DNode, F extends Fragment<DN>>(
     const directives = compileDirectives(
       { filter, cascade },
       usedVars,
-      allowedValues
+      new Set([...allowedValues, ..._allowedValues])
     );
 
     const mainFunc = compileMainFunc(_query, usedVars, allowedValues);
@@ -41,7 +41,7 @@ export function query<DN extends DNode, F extends Fragment<DN>>(
 
   return {
     build,
-    allowedValues,
+    allowedValues: _allowedValues,
     usedVars,
     type: undefined as never as Array<(typeof _query)["fragOpts"]["type"]>,
   };
