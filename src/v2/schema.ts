@@ -1,7 +1,7 @@
-import type { Forward, PredicateNode, Reverse } from "./predicate";
-import type { DNode } from "./node";
-import { spacing } from "./utils/spacing";
 import type { DEdge, EdgeInit } from "./edge";
+import type { DNode } from "./node";
+import type { PredicateNode } from "./predicate";
+import { spacing } from "./utils/spacing";
 
 export function schema(...nodes: DNode[]) {
   const schema: string[] = [];
@@ -57,7 +57,7 @@ export function buildNode(node: DNode) {
 
     const _pred = pred as DEdge<EdgeInit>;
     const { opts } = _pred;
-    const { type, asArray, count } = opts;
+    const { type, asArray } = opts;
     const predType = asArray ? `[${type}]` : type;
     let outerPred = `${typeDeclaration}: ${predType}`;
 
@@ -74,7 +74,6 @@ export function buildNode(node: DNode) {
 
     let innerPred = typeDeclaration;
 
-    if (count) outerPred += ` @count`;
     if (actualNode.name !== node.name) outerPred = "";
 
     if (outerPred.trim().length) {
