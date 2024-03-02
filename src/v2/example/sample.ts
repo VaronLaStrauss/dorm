@@ -97,6 +97,15 @@ const queries = queryBlock({
     filter: { field: "Human.name", op: "eq", value: "varFromOtherQuery" },
     fragOpts: userRecurseFrag,
   }),
+  user2: query({
+    mainFunc: {
+      op: "eq",
+      field: "Employee.audits",
+      value: 5,
+      wrap: "count",
+    },
+    fragOpts: userFrag,
+  }),
 });
 
 type UserQueries = typeof queries.type;

@@ -30,12 +30,16 @@ export function filterablePreds<DN extends DNode, F extends Filterables<DN>>(
     const field = `${actualNode.name}.${predName}`;
 
     if (typeof pred === "function") {
+      const {
+        opts: { count },
+      } = pred() as PredicateNode<DNode>;
       allowedFilters[predName] = {
         indexes: { uid_in: Indexless["uid_in"] },
         label,
         field,
         nodeName: node.name,
         jsType: "string" as const,
+        countable: count || false,
       };
       continue;
     }
@@ -57,6 +61,7 @@ export function filterablePreds<DN extends DNode, F extends Filterables<DN>>(
       nodeName: node.name,
       allowedValues:
         "allowedValues" in options ? options.allowedValues : undefined,
+      countable: false,
     };
   }
 
@@ -66,6 +71,7 @@ export function filterablePreds<DN extends DNode, F extends Filterables<DN>>(
     field: "dgraph.type",
     jsType: "string",
     nodeName: node.name,
+    countable: false,
   };
 
   allowedFilters["uid"] = {
@@ -74,6 +80,7 @@ export function filterablePreds<DN extends DNode, F extends Filterables<DN>>(
     field: "uid",
     jsType: "string",
     nodeName: node.name,
+    countable: true,
   };
 
   return allowedFilters;
@@ -130,12 +137,13 @@ export type AllowedFilter = {
   field: string;
   allowedValues?: Record<string | number, string | number>;
   nodeName: string;
+  countable: boolean;
 };
 
 export type AllowedFilters<
   FilterRecord extends Record<string, unknown> = Record<string, unknown>
 > = {
-  [key in keyof FilterRecord | "uid" | "dtype"]: AllowedFilter
+  [key in keyof FilterRecord | "uid" | "dtype"]: AllowedFilter;
 };
 
 type FilterOpts = {

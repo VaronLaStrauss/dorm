@@ -2,7 +2,12 @@ import type { ZeroValIndex, OneValIndex, TwoValIndex } from "./utils/indexes";
 
 export type FilterEdge =
   | { op: keyof typeof ZeroValIndex; value: string }
-  | { op: keyof typeof OneValIndex; field: string; value: unknown }
+  | {
+      op: keyof typeof OneValIndex;
+      field: string;
+      value: unknown;
+      wrap?: "uid" | "count";
+    }
   | { op: keyof typeof TwoValIndex; field: string; values: [unknown, unknown] };
 
 export type Filter =

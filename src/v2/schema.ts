@@ -28,7 +28,7 @@ export function buildNode(node: DNode) {
     if (typeof pred === "function") {
       const {
         nextNode,
-        opts: { asArray },
+        opts: { asArray, count },
         relation,
       } = pred() as PredicateNode<DNode>;
 
@@ -45,7 +45,9 @@ export function buildNode(node: DNode) {
       } else {
         const predType = asArray ? `[${nextNode.name}]` : nextNode.name;
         innerPred = `${actualNode.name}.${predKey}: ${predType}`;
-        outerPred += " @reverse .";
+        outerPred += " @reverse ";
+        if (count) outerPred += "@count ";
+        outerPred += ".";
       }
 
       innerPreds.push(space + innerPred);
