@@ -21,11 +21,11 @@ export function query<DN extends DNode, F extends Fragment<DN>>(
     if (override.allowedValues) _allowedValues = override.allowedValues;
   }
 
-  function build(
+  const build = (
     key: string,
     usedVars: Map<string, unknown>,
     allowedValues: Set<string>
-  ) {
+  ) => {
     allowedValues = new Set([...allowedValues, ..._allowedValues]);
     const directives = compileDirectives(
       { filter, cascade },
@@ -38,7 +38,7 @@ export function query<DN extends DNode, F extends Fragment<DN>>(
     if (fragOpts)
       query += `{\n${fragOpts.fragmentStr ?? fragOpts.build()}\n${_space}}`;
     return query;
-  }
+  };
 
   return {
     build,
