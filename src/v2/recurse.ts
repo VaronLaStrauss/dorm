@@ -1,17 +1,18 @@
 import { compileDirectives, compileMainFunc } from "./compiler/filter.compiler";
 import { buildRecurse, compileRecurse } from "./compiler/recurse.builder";
-import type { DEdge, EdgeInit, EdgeType, InferEdge } from "./edge";
+import type { DEdge, EdgeType, InferEdge } from "./edge";
 import type { FilterEdge, FilterFull, RecurseOpts } from "./filter";
 import type { EdgeFragment, ExpoundPred, ExpoundStatic } from "./fragment";
 import { DNode } from "./node";
 import type {
-  PredicateNode,
+  CountOpt,
   ExtendedPredicates,
   PassOpt,
-  PredOpt,
-  CountOpt,
   PredNodeOpts,
+  PredOpt,
+  PredicateNode,
 } from "./predicate";
+import { spacing } from "./utils/spacing";
 import type {
   Countable,
   Flatten,
@@ -20,7 +21,6 @@ import type {
   NullableType,
   UnionToIntersection,
 } from "./utils/types";
-import { spacing } from "./utils/spacing";
 
 export function recurse<
   MainDN extends DNode,
