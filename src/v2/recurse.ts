@@ -16,6 +16,7 @@ import type {
   Countable,
   Flatten,
   FragmentCommonReturn,
+  InitOpts,
   NullableType,
   UnionToIntersection,
 } from "./utils/types";
@@ -141,25 +142,26 @@ type _SwitchingInferRecurseFragment<
       opts: PredOpt;
     }
   ? RF[key]["opts"]["alias"] extends string
-    ? InferNextRecurseFragment<RF[key]["opts"]["alias"], NextDN, DNs, RF>
-    : InferNextRecurseFragment<key, NextDN, DNs, RF>
+    ? InferNextRecurseFragment<RF[key]["opts"]["alias"], NextDN, DNs, RF, Opts>
+    : InferNextRecurseFragment<key, NextDN, DNs, RF, Opts>
   : RF[key] extends Array<infer RFOpts>
   ? RFOpts extends CountOpt
     ? Countable<RFOpts, Opts, key>
     : RFOpts extends { opts: PredOpt }
     ? RFOpts["opts"]["alias"] extends string
-      ? InferNextRecurseFragment<RFOpts["opts"]["alias"], NextDN, DNs, RF>
-      : InferNextRecurseFragment<key, NextDN, DNs, RF>
+      ? InferNextRecurseFragment<RFOpts["opts"]["alias"], NextDN, DNs, RF, Opts>
+      : InferNextRecurseFragment<key, NextDN, DNs, RF, Opts>
     : never
-  : InferNextRecurseFragment<key, NextDN, DNs, RF>;
+  : InferNextRecurseFragment<key, NextDN, DNs, RF, Opts>;
 
 type InferNextRecurseFragment<
   key extends string | symbol | number,
   NextDN extends DNode,
   DNs extends DNode[],
-  RF extends RecurseFragment<NextDN | DNs[number]>
+  RF extends RecurseFragment<NextDN | DNs[number]>,
+  Opt extends InitOpts
 > = {
-  [k in key]: InferRecurseFragment<NextDN, DNs, RF>;
+  [k in key]: NullableType<Opt, InferRecurseFragment<NextDN, DNs, RF>>;
 };
 
 export type RecurseFragmentReturn<
