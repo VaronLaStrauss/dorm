@@ -23,6 +23,19 @@ export function pass<
 
 export type PassOpt = ReturnType<typeof pass>;
 
+// export function outsource<
+//   alias extends string | undefined,
+//   asVar extends string | undefined
+// >(
+//   outsourceVar: string,
+//   alias: alias = undefined as alias,
+//   asVar: asVar = undefined as asVar
+// ) {
+//   return { outsourceVar, alias, asVar };
+// }
+
+// export type OutsourceOpt = ReturnType<typeof outsource>;
+
 export function reverse<
   DN extends DNode,
   EP extends ExtendedPredicates<DN> = ExtendedPredicates<DN>,
@@ -48,7 +61,22 @@ export function count<
 
 export type CountOpt = ReturnType<typeof count>;
 
-export type PredNodeOpts = InitOpts & { count?: true };
+// type AggregationFunc = "min" | "max" | "sum" | "avg";
+
+// export function aggregate<
+//   alias extends string | undefined,
+//   asVar extends string | undefined
+// >(
+//   func: AggregationFunc,
+//   alias: alias = undefined as alias,
+//   asVar: asVar = undefined as asVar
+// ) {
+//   return { asCount: true as true, alias, asVar, aggregationFunc: func };
+// }
+
+// export type AggregateOpt = ReturnType<typeof aggregate>;
+
+export type PredNodeOpts = InitOpts & { count?: true; asType?: boolean };
 
 export function predicateNode<
   NextDN extends DNode,

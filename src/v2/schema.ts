@@ -28,9 +28,10 @@ export function buildNode(node: DNode) {
     if (typeof pred === "function") {
       const {
         nextNode,
-        opts: { asArray, count },
+        opts: { asArray, count, asType },
         relation,
       } = pred() as PredicateNode<DNode>;
+      if (asType) continue;
 
       const predType = asArray ? "[uid]" : "uid";
       let outerPred = `${typeDeclaration}: ${predType}`;
