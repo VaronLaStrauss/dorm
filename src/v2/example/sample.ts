@@ -22,6 +22,7 @@ const userFrag = fragment(
     password: [pass("$pass1", "passCheck"), pass("$pass2", "passwordRecheck")],
     audits: multi([
       {
+        page: { limit: "$lim", offset: "$off" },
         predicates: {
           user: {
             predicates: {
@@ -42,9 +43,22 @@ const userFrag = fragment(
           uid: true,
         },
       },
+      {
+        opts: pred("innerAudit2"),
+        filter: {
+          op: "eq",
+          field: "Human.name",
+          value: "$customVar",
+        },
+        predicates: {
+          uid: true,
+        },
+      },
     ]),
   },
-  { allowedValues: new Set(["varFromOtherQuery"]) }
+  {
+    allowedValues: new Set(["varFromOtherQuery", "$customVar", "$off", "$lim"]),
+  }
 );
 
 console.log(userFrag.fragmentStr);

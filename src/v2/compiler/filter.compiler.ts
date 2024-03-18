@@ -12,7 +12,7 @@ export function compileDirectives(
   const _filter = compileFilter(filter, usedVars, allowedValues);
   const _cascade = compileCascade(cascade, allowedValues);
   const _order = compileOrder(order, allowedValues);
-  const _page = compilePage(page);
+  const _page = compilePage(page, allowedValues);
 
   const directives: (string | undefined)[] = [
     _filter ? `@filter(${_filter})` : undefined,
@@ -34,7 +34,7 @@ export function compileMainFunc(
 
   const funcDeclaration: (string | undefined)[] = [`func: ${_mainFunc}`];
   funcDeclaration.push(compileOrder(order, allowedValues));
-  funcDeclaration.push(compilePage(page));
+  funcDeclaration.push(compilePage(page, allowedValues));
 
   return funcDeclaration.filter((v) => !!v).join(", ");
 }
@@ -79,13 +79,17 @@ export function compileFilter(
   return parsed;
 }
 
-export function compilePage(page: FilterFull["page"]) {
+export function compilePage(
+  page: FilterFull["page"],
+  allowedValues: Set<string>
+) {
   if (!page) return;
   const { limit, offset } = page;
   const _page = [];
-  _page.push(limit ? `first: ${limit} ` : "");
-  _page.push(offset ? `offset: ${offset} ` : "");
-
+  if (typeof limit === "string" && allowedValues.has(limit))
+    _page.push(limit ? `first: ${limit} ` : "");
+  if (typeof offset === "string" && allowedValues.has(offset))
+    _page.push(offset ? `offset: ${offset} ` : "");
   return _page.filter((v) => !!v).join(", ");
 }
 
