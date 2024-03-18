@@ -24,7 +24,7 @@ export type Cascade = string | boolean;
 export type FilterOpts = {
   page?: Page;
   cascade?: Cascade;
-  order?: Order | [Order, Order];
+  order?: [Order] | [Order, Order];
 };
 
 export type FilterFull = {

@@ -23,7 +23,7 @@ const userFrag = fragment(
     audits: multi([
       {
         page: { limit: "$lim", offset: "$off" },
-        order: { field: "Human.name" },
+        order: [{ field: "Human.name" }],
         predicates: {
           user: {
             predicates: {

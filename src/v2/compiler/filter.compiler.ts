@@ -99,15 +99,10 @@ export function compileOrder(
 ) {
   if (!orders) return;
   const _orders: string[] = [];
-  if ("length" in orders) {
-    for (const order of orders) {
-      if (!order || !allowedValues.has(order.field)) continue;
-      _orders.push(`order${order.format ?? "asc"}: ${order.field}`);
-    }
-  } else {
-    const order = orders;
-    if (order && allowedValues.has(order.field))
-      _orders.push(`order${order.format ?? "asc"}: ${order.field}`);
+
+  for (const order of orders) {
+    if (!order || !allowedValues.has(order.field)) continue;
+    _orders.push(`order${order.format ?? "asc"}: ${order.field}`);
   }
 
   return _orders.join(", ");
