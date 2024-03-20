@@ -74,7 +74,7 @@ export class DNodeExtended<
     let predToType = this._predToNode;
     if (!predToType) {
       const extractedNodes = this.extractedNodes;
-      predToType = this.setPredToNode([...extractedNodes, this as never]);
+      predToType = this.setPredToNode(extractedNodes);
     }
     return predToType;
   }
@@ -85,8 +85,7 @@ export class DNodeExtended<
   }
 
   private get extractedNodes() {
-    if (!this._extractedNodes)
-      this._extractedNodes = extractAllNodes(this.extendedNodes);
+    if (!this._extractedNodes) this._extractedNodes = extractAllNodes([this]);
     return this._extractedNodes;
   }
 
