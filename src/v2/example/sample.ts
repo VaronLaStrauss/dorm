@@ -12,51 +12,41 @@ import { Employee, Human, User } from "./user";
 
 console.log("\n---- FRAGMENT -----\n");
 
+const auditFrag = fragment(Audit, {
+  content: {
+    predicates: {
+      uid: true,
+      detail: true,
+    },
+  },
+});
+
+const userCommonFrag = fragment(User, {
+  name: true,
+  active: true,
+});
+
 const userFrag = fragment(
   User,
   {
+    dExtend: userCommonFrag,
     uid: [pred("id"), count("uidCount")],
     employeeCode: [pred("employeeCodeAlias1"), pred("employeeCodeAlias2")],
-    name: true,
-    active: true,
     password: [pass("$pass1", "passCheck"), pass("$pass2", "passwordRecheck")],
-    audits: multi([
+    audits: multi(
+      Audit,
       {
-        page: { limit: "$lim", offset: "$off" },
-        order: [{ field: "Human.name" }],
+        opts: pred("otherAudits"),
         predicates: {
-          user: {
-            predicates: {
-              uid: [count(), pred("actualUid")],
-            },
-          },
-        },
-      },
-      {
-        opts: pred("innerAudit"),
-        order: [{ field: "Human.name" }, { field: "Human.name" }],
-        filter: {
-          op: "eq",
-          field: "Human.name",
-          value: "varFromOtherQuery",
-          wrap: "uid",
-        },
-        predicates: {
+          dExtend: auditFrag,
           uid: true,
         },
       },
       {
-        opts: pred("innerAudit2"),
-        filter: {
-          op: "eq",
-          field: "Human.name",
-          value: "$customVar",
-        },
-        predicates: {
-          uid: true,
-        },
-      },
-    ]),
+        opts: pred("x"),
+        predicates: { auditDate: true, dExtend: auditFrag },
+      }
+    ),
   },
   {
     allowedValues: new Set(["varFromOtherQuery", "$customVar", "$off", "$lim"]),

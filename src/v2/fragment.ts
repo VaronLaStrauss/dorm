@@ -55,7 +55,7 @@ export function fragment<DN extends DNode, F extends Fragment<DN>>(
 export function multi<
   DN extends DNode,
   Frags extends Array<NodeFragment<DN, InitOpts>>
->(frags: [...Frags]) {
+>(_type: DN, ...frags: [...Frags]) {
   return frags;
 }
 
@@ -87,12 +87,8 @@ export type Fragment<
 } & {
   uid?: boolean | PredOpt | CountOpt | (PredOpt | CountOpt)[];
   dtype?: boolean | PredOpt;
+  dExtend?: FragmentReturn<CurrentDN, any>;
 };
-
-type PredicatePortion<NextDN extends DNode> = {
-  predicates: Fragment<NextDN>;
-  opts?: PredOpt;
-} & FilterFull;
 
 export type InferFragment<
   DN extends DNode,
@@ -113,23 +109,27 @@ export type InferFragment<
               infer _,
               infer Opts
             >
-          ? QF[key] extends PredicatePortion<NextDN>
-            ? ExpoundPred<
-                QF[key]["opts"],
-                Opts,
-                key,
-                InferFragment<NextDN, QF[key]["predicates"]>
-              >
+          ? QF[key] extends NextFragment<NextDN>
+            ? QF[key]["predicates"] extends Fragment<NextDN>
+              ? ExpoundPred<
+                  QF[key]["opts"],
+                  Opts,
+                  key,
+                  InferFragment<NextDN, QF[key]["predicates"]>
+                >
+              : never
             : QF[key] extends CountOpt
             ? Countable<QF[key], Opts, key>
             : QF[key] extends Array<infer QFPortion>
-            ? QFPortion extends PredicatePortion<NextDN>
-              ? ExpoundPred<
-                  QFPortion["opts"],
-                  Opts,
-                  key,
-                  InferFragment<NextDN, QFPortion["predicates"]>
-                >
+            ? QFPortion extends NextFragment<NextDN>
+              ? QFPortion["predicates"] extends Fragment<NextDN>
+                ? ExpoundPred<
+                    QFPortion["opts"],
+                    Opts,
+                    key,
+                    InferFragment<NextDN, QFPortion["predicates"]>
+                  >
+                : never
               : QFPortion extends CountOpt
               ? Countable<QFPortion, Opts, key>
               : never
@@ -146,6 +146,10 @@ export type InferFragment<
             : PO extends PredOpt | boolean
             ? ExpoundStatic<PO, key>
             : never
+          : never
+        : key extends "dExtend"
+        ? QF[key] extends FragmentReturn<DN, any>
+          ? QF[key]["type"]
           : never
         : never;
     }[keyof QF]
