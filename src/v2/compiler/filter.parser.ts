@@ -46,7 +46,7 @@ export function parseFilter(
   return `${filter.op}(${filter.field}, ${var1})`;
 }
 
-function parseFilterValue(
+export function parseFilterValue(
   value: unknown,
   usedVars: Map<string, unknown>,
   allowedValues: Set<string>

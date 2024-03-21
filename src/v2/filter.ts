@@ -15,7 +15,10 @@ export type Filter =
   | { not: Filter }
   | FilterEdge;
 
-export type Page = { limit?: number | string; offset?: number | string };
+export type Page = { limit?: number | string } & (
+  | { after?: string }
+  | { offset?: number | string }
+);
 
 export type Order = { field: string; format?: "asc" | "desc" };
 
