@@ -1,4 +1,4 @@
-import type { Fragment, NextFragment } from "../fragment";
+import type { Fragment, FragmentReturn, NextFragment } from "../fragment";
 import type { DNode } from "../node";
 import type { CountOpt, PredOpt, PredicateNode } from "../predicate";
 import { buildStatic, buildEdge, buildStaticCount } from "./edge.builder";
@@ -17,6 +17,12 @@ export function buildFragment<DN extends DNode, F extends Fragment<DN>>(
   for (const predName in fragment) {
     const opts = fragment[predName];
     if (!opts) continue;
+
+    if (predName === "dExtend") {
+      const _opts = opts as FragmentReturn<never, never>;
+      inners.push(_opts.fragmentStr ?? _opts.build());
+      continue;
+    }
 
     if (predName === "uid" || predName === "dtype") {
       let inner: string;
