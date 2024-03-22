@@ -59,7 +59,6 @@ const userFrag = fragment(
   },
   {
     allowedValues: new Set(["varFromOtherQuery", "$customVar", "$off", "$lim"]),
-    usedVars: userCommonFrag.usedVars,
   }
 );
 

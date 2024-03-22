@@ -22,9 +22,9 @@ export function buildFragment<DN extends DNode, F extends Fragment<DN>>(
       const _opts = opts as FragmentReturn<never, never>;
       inners.push(_opts.fragmentStr ?? _opts.build());
 
-      Object.entries(_opts.usedVars).forEach(([key, val]) => {
-        usedVars.set(key, val);
-      });
+      for (const [key, value] of _opts.usedVars) {
+        usedVars.set(key, value);
+      }
       continue;
     }
 

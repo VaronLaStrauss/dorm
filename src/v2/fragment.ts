@@ -24,26 +24,20 @@ export type FragmentReturn<DN extends DNode, F extends Fragment<DN>> = {
   type: InferFragment<DN, F>;
 } & FragmentCommonReturn;
 
-type FragmentOpts = {
-  allowedValues?: Set<string>;
-  usedVars?: Map<string, unknown>;
-};
-
 export function fragment<DN extends DNode, F extends Fragment<DN>>(
   node: DN,
   fragment: F,
-  opts: FragmentOpts = {
+  opts = {
     allowedValues: new Set<string>(),
-    usedVars: new Map<string, unknown>(),
   },
   buildNow = true
 ): FragmentReturn<DN, F> {
-  const { allowedValues: _av, usedVars: _uv } = opts;
-  const usedVars = new Map<string, unknown>([...(_uv ?? [])]);
+  const { allowedValues: _av } = opts;
+  const usedVars = new Map<string, unknown>();
   const allowedValues = new Set<string>([
     ...node.getAllowedValues(),
     ...node.typeNames,
-    ...(_av ?? []),
+    ..._av,
   ]);
 
   function build() {
