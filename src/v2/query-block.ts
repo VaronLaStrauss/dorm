@@ -32,7 +32,7 @@ export function queryBlock<QI extends QueryItems>(
 
   for (let [key, val] of usedVars) {
     if (key in outsourcedVars) val = outsourcedVars[key];
-    if (!val) continue;
+    if (val === null || val === undefined) continue;
     let actualVal = String(val);
     if (val instanceof Array) actualVal = `[${actualVal}]`;
     vars[key] = actualVal;
