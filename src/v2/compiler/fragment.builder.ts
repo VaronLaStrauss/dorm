@@ -21,6 +21,10 @@ export function buildFragment<DN extends DNode, F extends Fragment<DN>>(
     if (predName === "dExtend") {
       const _opts = opts as FragmentReturn<never, never>;
       inners.push(_opts.fragmentStr ?? _opts.build());
+
+      Object.entries(_opts.usedVars).forEach(([key, val]) => {
+        usedVars.set(key, val);
+      });
       continue;
     }
 
