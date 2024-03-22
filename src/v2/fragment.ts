@@ -56,8 +56,10 @@ export function fragment<DN extends DNode, F extends Fragment<DN>>(
 
 export function multi<
   DN extends DNode,
-  Frags extends Array<NodeFragment<DN, InitOpts>>
->(_type: DN, ...frags: [...Frags]) {
+  Frags extends Array<NodeFragment<DN, InitOpts>> = Array<
+    NodeFragment<DN, InitOpts>
+  >
+>(_node: DN, ...frags: [...Frags]) {
   return frags;
 }
 
@@ -80,7 +82,7 @@ export type Fragment<
     infer _,
     infer Opts
   >
-    ? NodeFragment<NextDN, Opts> | ReturnType<typeof multi<NextDN, any>>
+    ? NodeFragment<NextDN, Opts> | Array<NodeFragment<NextDN, Opts>>
     : EP[predName] extends DEdge<infer Opts>
     ? Opts["type"] extends EdgeType.PASSWORD
       ? PassOpt | PassOpt[]
