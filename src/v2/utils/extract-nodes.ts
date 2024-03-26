@@ -9,5 +9,5 @@ export function extractAllNodes(nodes: (DNode | DNodeExtended)[]) {
       continue;
     }
   }
-  return extracted;
+  return [...new Set(extracted)];
 }
