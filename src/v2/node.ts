@@ -25,7 +25,7 @@ export class DNode<
   }
 
   get typeNames(): string[] {
-    return [this.name];
+    return [...new Set([this.name])];
   }
 
   setPredToNode(nodes: DNode[]) {
@@ -81,7 +81,7 @@ export class DNodeExtended<
 
   override get typeNames() {
     const nodes = this.extractedNodes;
-    return [this.name, ...nodes.map((node) => node.name)];
+    return [...new Set([this.name, ...nodes.map((node) => node.name)])];
   }
 
   private get extractedNodes() {
