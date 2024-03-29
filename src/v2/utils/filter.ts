@@ -60,8 +60,6 @@ export function filterablePreds<DN extends DNode, F extends Filterables<DN>>(
       ...extractIndexes(options, predName, actualNode.name),
     };
     const jsType = parseJsType(options);
-    if ("allowedValues" in options) {
-    }
 
     allowedFilters[predName] = {
       indexes,
@@ -115,12 +113,9 @@ function extractIndexes(options: EdgeInit, predName: string, nodeName: string) {
 
       indexes = { ...indexes, ...stringIdx };
     } else {
-      const dateIdx = (
-        Object.keys(options.indexes) as (keyof typeof DateTimeIndex)[]
-      ).reduce(
-        (acc, key) => ({ ...acc, ...DateTimeIndex[key] }),
-        {} as Record<string, unknown>
-      );
+      const dateIdx = options.indexes.reduce((acc, key) => {
+        return { ...acc, ...DateTimeIndex[key] };
+      }, {} as Record<string, unknown>);
       indexes = { ...indexes, ...dateIdx };
     }
   }
