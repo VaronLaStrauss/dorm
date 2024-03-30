@@ -5,7 +5,8 @@ import type { Flatten, NullableType, UnionToIntersection } from "./utils/types";
 
 export function mutate<DN extends DNode>(
   node: DN,
-  fields: MutationFields<DN>
+  fields: MutationFields<DN>,
+  asDelete = false
 ): Record<string, unknown> {
   const predToNode = node.getPredToNode();
   const vars: Record<string, unknown> = {};
@@ -48,7 +49,7 @@ export function mutate<DN extends DNode>(
     vars[predName] = value;
   }
 
-  if (!("dtype" in fields)) vars["dgraph.type"] = node.typeNames;
+  if (!("dtype" in fields) && !asDelete) vars["dgraph.type"] = node.typeNames;
   return vars;
 }
 
