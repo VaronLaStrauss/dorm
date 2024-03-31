@@ -41,6 +41,7 @@ export function filterablePreds<DN extends DNode, F extends Filterables<DN>>(
           ...EqualityOps,
           ...InequalityOps,
         }),
+        has: Indexless["has"],
       };
 
       allowedFilters[predName] = {
