@@ -1,6 +1,6 @@
 import type { ZeroValIndex, OneValIndex, TwoValIndex } from "./utils/indexes";
 
-export type FilterEdge =
+export type FilterEdge = (
   | { op: keyof typeof ZeroValIndex; value: string }
   | {
       op: keyof typeof OneValIndex;
@@ -8,12 +8,12 @@ export type FilterEdge =
       value: unknown;
       wrap?: "uid" | "count";
     }
-  | { op: keyof typeof TwoValIndex; field: string; values: [unknown, unknown] };
-
-export type Filter = (
-  | { connector: "and" | "or"; values: Filter[] }
-  | FilterEdge
+  | { op: keyof typeof TwoValIndex; field: string; values: [unknown, unknown] }
 ) & { not?: boolean };
+
+export type Filter =
+  | { connector: "and" | "or"; values: Filter[]; not?: boolean }
+  | FilterEdge;
 
 export type Page = { limit?: number | string } & (
   | { after?: string }
