@@ -91,6 +91,12 @@ const queries = queryBlock({
   userRecurse: recurse({
     mainFunc: { field: "Human.name", op: "eq", value: "existingAsVar" },
     fragOpts: userRecurseFrag,
+    filter: {
+      field: "Human.name",
+      op: "eq",
+      value: "some random name",
+      not: true,
+    },
   }),
   user2: query({
     mainFunc: {

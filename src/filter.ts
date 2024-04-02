@@ -10,10 +10,10 @@ export type FilterEdge =
     }
   | { op: keyof typeof TwoValIndex; field: string; values: [unknown, unknown] };
 
-export type Filter =
+export type Filter = (
   | { connector: "and" | "or"; values: Filter[] }
-  | { not: Filter }
-  | FilterEdge;
+  | FilterEdge
+) & { not?: true };
 
 export type Page = { limit?: number | string } & (
   | { after?: string }

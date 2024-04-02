@@ -64,19 +64,14 @@ export function compileFilter(
     if (!filters.length) return;
 
     const joined = filters.join(` ${filter.connector.toUpperCase()} `);
-    if (filters.length > 1) return `(${joined})`;
-
+    if (filters.length > 1)
+      return filter.not ? `NOT(${joined})` : `(${joined})`;
     return joined;
-  }
-  if ("not" in filter) {
-    const _filter = compileFilter(filter.not, usedVars, allowedValues);
-    if (!_filter) return;
-    return `NOT(${_filter})`;
   }
 
   const parsed = parseFilter(filter, usedVars, allowedValues);
   if (!parsed) return;
-  return parsed;
+  return filter.not ? `NOT(${parsed})` : parsed;
 }
 
 export function compilePage(
