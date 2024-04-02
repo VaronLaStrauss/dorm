@@ -13,7 +13,7 @@ export type FilterEdge =
 export type Filter = (
   | { connector: "and" | "or"; values: Filter[] }
   | FilterEdge
-) & { not?: true };
+) & { not?: boolean };
 
 export type Page = { limit?: number | string } & (
   | { after?: string }
