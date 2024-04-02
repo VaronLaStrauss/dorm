@@ -24,15 +24,6 @@ const auditFrag = fragment(Audit, {
 const userCommonFrag = fragment(User, {
   name: true,
   active: true,
-  audits3: {
-    page: {
-      after: "0x12",
-      limit: 10,
-    },
-    predicates: {
-      uid: true,
-    },
-  },
 });
 
 const userFrag = fragment(
