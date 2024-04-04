@@ -20,8 +20,8 @@ export class DNode<
 
   constructor(public readonly name: name, public predicates: NPR) {}
 
-  extends<EN extends Array<DNode>>(...extendedNodes: EN) {
-    return new DNodeExtended(this.name, this.predicates, () => extendedNodes);
+  extends<EN extends Array<DNode>>(extendedNodes: () => EN) {
+    return new DNodeExtended(this.name, this.predicates, extendedNodes);
   }
 
   get typeNames(): string[] {
