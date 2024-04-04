@@ -95,6 +95,7 @@ export type PredicateNode<
 export type ExtendedPredicates<DN extends DNode | DNodeExtended> =
   DN extends DNodeExtended
     ? UnionToIntersection<
-        DN["predicates"] & ExtendedPredicates<DN["extendedNodes"][number]>
+        DN["predicates"] &
+          ExtendedPredicates<ReturnType<DN["extendedNodes"]>[number]>
       >
     : DN["predicates"];

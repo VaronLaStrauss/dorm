@@ -21,7 +21,7 @@ export class DNode<
   constructor(public readonly name: name, public predicates: NPR) {}
 
   extends<EN extends Array<DNode>>(...extendedTypes: EN) {
-    return new DNodeExtended(this.name, this.predicates, extendedTypes);
+    return new DNodeExtended(this.name, this.predicates, () => extendedTypes);
   }
 
   get typeNames(): string[] {
@@ -63,7 +63,7 @@ export class DNodeExtended<
   _extendedPredicates?: NodePredicateRecord;
   _extractedNodes?: DNode[];
 
-  constructor(name: name, predicates: NPR, public extendedNodes: EN) {
+  constructor(name: name, predicates: NPR, public extendedNodes: () => EN) {
     super(name, predicates);
   }
 
@@ -91,9 +91,10 @@ export class DNodeExtended<
 
   override get extendedPredicates(): NodePredicateRecord {
     if (this._extendedPredicates) return this._extendedPredicates;
-    const extended = this.extendedNodes.reduce((acc, curr) => {
+    const extendedNodes = this.extendedNodes();
+    const extended = extendedNodes.reduce((acc, curr) => {
       return { ...curr.extendedPredicates, ...acc };
-    }, {} as Record<keyof (typeof this.extendedNodes)[number], (typeof this.extendedNodes)[number]["extendedPredicates"]>);
+    }, {} as Record<keyof (typeof extendedNodes)[number], (typeof extendedNodes)[number]["extendedPredicates"]>);
 
     this._extendedPredicates = { ...this.predicates, ...extended };
     return this._extendedPredicates;
