@@ -11,6 +11,14 @@ export const Human = node("Human", {
     indexes: ["hash"],
   }),
 });
+export const Human2 = node("Human2", {
+  name2: edge({
+    type: EdgeType.STRING,
+    nullable: true,
+    asArray: true,
+    indexes: ["hash"],
+  }),
+});
 
 const UserActive = from([1, 2, 3]);
 
@@ -21,8 +29,8 @@ export const Employee = node("Employee", {
     type: EdgeType.FLOAT,
     allowedValues: UserActive,
   }),
-}).extends(Human);
+}).extends(() => [Human]);
 
 export const User = node("User", {
   password: edge({ type: EdgeType.PASSWORD }),
-}).extends(Employee);
+}).extends(() => [Employee, Human2]);

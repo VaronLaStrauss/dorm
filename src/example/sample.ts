@@ -24,6 +24,7 @@ const auditFrag = fragment(Audit, {
 const userCommonFrag = fragment(User, {
   name: true,
   active: true,
+  name2: true,
 });
 
 const userFrag = fragment(
