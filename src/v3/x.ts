@@ -13,12 +13,11 @@ export enum SpecialScalarTypes {
   geo = "geo",
 }
 
-export type Predicate =
-  | BasicScalarTypes
-  | SpecialScalarTypes
-  | (new () => Object);
+export type Constructor<T extends Object = Object> = new () => T;
 
-export type PredicateIndex<P extends Predicate> = P extends new () => Object
+export type Predicate = BasicScalarTypes | SpecialScalarTypes | Constructor;
+
+export type PredicateIndex<P extends Predicate> = P extends Constructor
   ? { count?: true }
   : P extends SpecialScalarTypes.geo
   ? { [key in keyof typeof GeoOps]?: true }
@@ -40,62 +39,104 @@ export class DNode {
 
   predicates: Record<
     string,
-    { next: Predicate; asArray?: boolean; index: Record<string, boolean> }
+    {
+      next: Predicate;
+      asArray?: boolean;
+      index?: Record<string, boolean>;
+      reverse?: string;
+      encode?: <T>(v: T) => string;
+      decode?: <T>(v: string) => T;
+    }
   >;
   facets: Record<string, Record<string, BasicScalarTypes>>;
   dName: string;
 }
 
 export function Node(name: string) {
-  return function <Class extends new () => Object>(target: Class) {
+  return function <Class extends Constructor>(target: Class) {
     target.prototype.dName = name;
   };
 }
 
-export function Predicate<P extends Predicate>(
+export function Predicate<
+  P extends Predicate,
+  K extends (string | symbol) & keyof T,
+  T extends Object
+>(
   type: P,
   opts?: {
-    indexes: PredicateIndex<P>;
+    index?: PredicateIndex<P>;
     asArray?: boolean;
-  } & (P extends new () => infer U ? { reverse?: keyof U } : {})
+  } & (P extends Constructor<infer U>
+    ? { reverse?: keyof U }
+    : {
+        encode?: (v: T[K]) => string | (new (v: T[K]) => string);
+        decode?: ((v: string) => T[K]) | (new (v: string) => T[K]);
+      })
 ) {
-  return function (target: any, propertyKey: string | symbol) {
+  return function (_target: T, propertyKey: K) {
+    const target = _target as any;
     if (!target.predicates) target.predicates = {};
     target.predicates[propertyKey as string] = { next: type, ...(opts ?? {}) };
-  } satisfies PropertyDecorator;
+  };
 }
 
-export function Facet(key: string, type: BasicScalarTypes) {
-  return function (target: any, propertyKey: string | symbol) {
+export function Facet<T extends Object>(key: keyof T, type: BasicScalarTypes) {
+  return function (_target: T, propertyKey: string | symbol) {
+    const target = _target as any;
     if (!target.facets) target.facets = {};
     if (!target.facets[key]) target.facets[key] = {};
     target.facets[key][propertyKey as string] = type;
-  } satisfies PropertyDecorator;
+  };
+}
+
+type FacetType<O extends Object, K extends keyof O, T> = T;
+
+export function DateToIsoString(date: Date) {
+  return date.toISOString();
 }
 
 @Node("User")
 class User {
-  @Predicate(BasicScalarTypes.string, { indexes: { exact: true } })
+  @Predicate(BasicScalarTypes.string, { index: { exact: true } })
   email: string;
 
+  @Facet("email", BasicScalarTypes.bool)
+  active: FacetType<User, "email", string>;
+
+  @Predicate(BasicScalarTypes.dateTime, {
+    encode: DateToIsoString,
+    decode: Date,
+  })
+  registeredDate: Date;
+
   @Predicate(User, {
-    indexes: { count: true },
+    index: { count: true },
     asArray: true,
     reverse: "friends",
   })
   friends?: User[];
+
+  @Facet("friends", BasicScalarTypes.dateTime)
+  becameFriendsOn: FacetType<User, "friends", Date>;
 }
 
-const user = new User();
-
-console.log(user);
+type JsScalarTypes =
+  | string
+  | boolean
+  | number
+  | Date
+  | string[]
+  | boolean[]
+  | number[]
+  | Date[];
 
 type Fragment<T extends Object> = {
-  [key in keyof T]?: T[key] extends string | boolean | number | Date
-    ? boolean
+  [key in keyof T]?: T[key] extends JsScalarTypes
+    ? boolean // TODO: predopts?
     : T[key] extends Array<infer U> | infer U
     ? U extends Object
-      ? Fragment<U>
+      ? Fragment<U> // TODO: filters, page, etc
       : never
     : never;
 };
@@ -107,4 +148,6 @@ function fragment<T extends Object, F extends Fragment<T>>(
   return fragment;
 }
 
-fragment(user, { friends: { friends: { email: true, friends: {} } } });
+const frag = fragment(User.prototype, {
+  friends: { friends: { email: true } },
+});
