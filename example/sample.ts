@@ -1,13 +1,13 @@
-import { fragment, multi } from "../fragment";
-import { mutate } from "../mutation";
-import { count, pass, pred } from "../predicate";
-import { query } from "../query";
-import { queryBlock } from "../query-block";
-import { recurse, recurseFragment } from "../recurse";
-import { schema } from "../schema";
-import { filterablePreds } from "../utils/filter";
+import { fragment, multi } from "../src/fragment";
+import { mutate } from "../src/mutation";
+import { count, pass, pred } from "../src/predicate";
+import { query } from "../src/query";
+import { queryBlock } from "../src/query-block";
+import { recurse, recurseFragment } from "../src/recurse";
+import { schema } from "../src/schema";
+import { filterablePreds } from "../src/utils/filter";
 import { Audit } from "./audit";
-import { Content } from "./contact";
+import { Content } from "./content";
 import { Employee, Human, User } from "./user";
 
 console.log("\n---- FRAGMENT -----\n");

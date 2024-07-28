@@ -1,7 +1,7 @@
-import { EdgeType, edge } from "..";
-import { node } from "../node";
-import { forward, predicateNode, reverse } from "../predicate";
-import { Content } from "./contact";
+import { EdgeType, edge } from "../src";
+import { node } from "../src/node";
+import { forward, predicateNode, reverse } from "../src/predicate";
+import { Content } from "./content";
 import { User } from "./user";
 
 export const Audit = node("Audit", {

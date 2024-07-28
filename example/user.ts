@@ -1,6 +1,6 @@
-import { EdgeType, edge, from } from "../edge";
-import { node } from "../node";
-import { forward, predicateNode } from "../predicate";
+import { EdgeType, edge, from } from "../src/edge";
+import { node } from "../src/node";
+import { forward, predicateNode } from "../src/predicate";
 import { Audit } from "./audit";
 
 export const Human = node("Human", {
@@ -11,6 +11,7 @@ export const Human = node("Human", {
     indexes: ["hash"],
   }),
 });
+
 export const Human2 = node("Human2", {
   name2: edge({
     type: EdgeType.STRING,
