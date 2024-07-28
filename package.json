@@ -2,7 +2,7 @@
   "name": "dorm",
   "module": "index.ts",
   "type": "module",
-  "version": "2.3.2",
+  "version": "2.3.3",
   "devDependencies": {
     "@types/uuid": "^9.0.8",
     "bun-types": "latest"
@@ -10,5 +10,15 @@
   "peerDependencies": {
     "typescript": "^5.3.3",
     "uuid": "^9.0.1"
+  },
+  "main": "dist/index.js",
+  "types": "dist/src/index.d.ts",
+  "files": [
+    "/dist"
+  ],
+  "scripts": {
+    "build": "bun run build:js && bun run build:types",
+    "build:js": "bun build index.ts --outdir ./dist --target node --sourcemap=external --minify",
+    "build:types": "bun x tsc --emitDeclarationOnly"
   }
 }

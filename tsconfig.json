@@ -3,9 +3,9 @@
     "lib": [
       "ESNext"
     ],
-    "module": "esnext",
-    "target": "esnext",
-    "moduleResolution": "bundler",
+    "module": "ESNext",
+    "target": "ESNext",
+    "declaration": true,
     "moduleDetection": "force",
     "allowImportingTsExtensions": true,
     "noEmit": true,
@@ -22,6 +22,10 @@
     ],
     "verbatimModuleSyntax": true,
     "strictPropertyInitialization": false,
-    "experimentalDecorators": true
-  }
+    "experimentalDecorators": true,
+    "outDir": "./dist"
+  },
+  "include": [
+    "src/**/*"
+  ]
 }
